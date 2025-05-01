@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "386878655194",
+    "project_id": "saraya-53a77",
+    "storage_bucket": "saraya-53a77.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:386878655194:android:89250c43101515c075f3e3",
+        "android_client_info": {
+          "package_name": "com.salvage.salvage_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "386878655194-1micg632jif0ehu3t8qpm6iqjnijv68i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRp61sas7FD68VvSEtqYyXVnFgUiEfFhE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "386878655194-1micg632jif0ehu3t8qpm6iqjnijv68i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
