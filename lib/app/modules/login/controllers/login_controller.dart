@@ -1,19 +1,23 @@
 import 'package:get/get.dart';
+import 'package:salvage_app/app/widgets/custom_toast.dart';
+import 'package:salvage_app/app/routes/app_pages.dart';
+import 'package:salvage_app/app/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:salvage_app/app/routes/app_pages.dart';
-import 'package:flutter/material.dart';
-import 'package:salvage_app/app/widgets/custom_toast.dart';
 
 class LoginController extends GetxController {
   var email = ''.obs;
   var password = ''.obs;
   var obscurePassword = true.obs;
 
-  void togglePasswordVisibility() =>
-      obscurePassword.value = !obscurePassword.value;
+  var isGoogleSignInClicked = false.obs;
 
-  Future<void> login() async {
+  final AuthService authService = AuthService();
+
+  void togglePasswordVisibility() => obscurePassword.value = !obscurePassword.value;
+
+  // Connexion via Firebase (optionnel)
+  Future<void> loginWithFirebase() async {
     final context = Get.context!;
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -23,10 +27,15 @@ class LoginController extends GetxController {
       CustomToast.showSuccess(context, 'Connexion réussie');
       Get.offAllNamed(Routes.HOME);
     } catch (e) {
-      CustomToast.showError(context, 'Identifiants invalides');
+      String errorMessage = 'Erreur inconnue';
+      if (e is FirebaseAuthException) {
+        errorMessage = e.message ?? 'Problème de connexion';
+      }
+      CustomToast.showError(context, 'Identifiants invalides: $errorMessage');
     }
   }
 
+  // Connexion via Google (optionnel)
   Future<void> signInWithGoogle() async {
     final context = Get.context!;
     try {
@@ -44,7 +53,35 @@ class LoginController extends GetxController {
       CustomToast.showSuccess(context, 'Connexion via Google réussie');
       Get.offAllNamed(Routes.HOME);
     } catch (e) {
-      CustomToast.showError(context, 'Échec de la connexion Google');
+      CustomToast.showError(context, 'Échec de la connexion Google: ${e.toString()}');
     }
+  }
+
+  // Connexion via backend
+  Future<void> loginWithBackend() async {
+    final context = Get.context!;
+    try {
+      final authResponse = await authService.login(
+        email.value.trim(),
+        password.value,
+      );
+
+      // Ici, tu peux sauvegarder les tokens dans GetStorage ou SharedPreferences
+
+      CustomToast.showSuccess(context, 'Connexion réussie via l\'API');
+      Get.offAllNamed(Routes.HOME);
+
+    } on InactiveAccountException catch (e) {
+      // Gestion du compte inactif avec redirection vers l'OTP et passage de l'id
+      CustomToast.showError(context, e.message);
+      Get.toNamed(Routes.LOGIN_OTP, arguments: {'userId': e.userId});
+
+    } catch (e) {
+      CustomToast.showError(context, 'Erreur de connexion via l\'API: ${e.toString()}');
+    }
+  }
+
+  void toggleGoogleSignInState() {
+    isGoogleSignInClicked.value = !isGoogleSignInClicked.value;
   }
 }

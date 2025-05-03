@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:salvage_app/app/theme/app_theme.dart';
+import 'package:salvage_app/app/routes/app_pages.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int activeIndex;
@@ -29,7 +31,20 @@ class CustomBottomNavBar extends StatelessWidget {
 
           return GestureDetector(
             onTap: () {
-              // TODO: navigation logic à implémenter
+              switch (index) {
+                case 0:
+                  Get.offAllNamed(Routes.HOME); // ← Accueil
+                  break;
+                case 1:
+                // Ne fait rien pour "Rendez-vous" pour l'instant
+                  break;
+                case 2:
+                  Get.toNamed(Routes.CHAT); // ← Chat
+                  break;
+                case 3:
+                  Get.toNamed(Routes.PROFILE); // ← Profil
+                  break;
+              }
             },
             child: Column(
               mainAxisSize: MainAxisSize.min,

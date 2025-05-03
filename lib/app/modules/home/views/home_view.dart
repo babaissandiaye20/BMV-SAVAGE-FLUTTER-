@@ -24,7 +24,7 @@ class HomeView extends StatelessWidget {
             const SizedBox(height: 32),
             _buildMainActionCards(context),
             const SizedBox(height: 32),
-            Expanded(child: _buildAppointmentHistory()),
+            _buildAppointmentHistory(),
           ],
         ),
       ),
@@ -32,7 +32,7 @@ class HomeView extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primary,
         onPressed: () {
-          CustomToast.showSuccess(context, "Chat ouvert");
+          Get.toNamed(Routes.CHAT);
         },
         child: const Icon(Icons.chat_bubble_outline, color: Colors.white),
       ),
@@ -40,77 +40,121 @@ class HomeView extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Image.asset('assets/images/logorb.png', height: 48),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'Ohio Vehicle',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.text,
-                    ),
-                  ),
-                  Text(
-                    'Inspection Scheduler',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications_none_outlined, size: 28),
-            onPressed: () {
-              CustomToast.showError(context, "Aucune nouvelle notification");
-            },
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
           ),
         ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Image.asset('assets/images/logorb.png', height: 48, color: Colors.white),
+                    const SizedBox(width: 12),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Ohio Vehicle',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          'Inspection Scheduler',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: IconButton(
+                    icon: Icon(Icons.notifications_none_outlined,
+                        size: 28,
+                        color: AppColors.primary
+                    ),
+                    onPressed: () {
+                      CustomToast.showError(context, "Aucune nouvelle notification");
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildMainActionCards(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          CustomActionCard(
-            icon: Icons.upload_file,
-            label: 'Téléverser',
-            background: AppColors.primary,
-            iconColor: Colors.white,
-            textColor: Colors.white,
-            onTap: () {
-              Get.toNamed(Routes.UPLOAD_DOCUMENTS);
-            },
-          ),
-          CustomActionCard(
-            icon: Icons.calendar_today,
-            label: 'Rendez-vous',
-            background: AppColors.secondary,
-            iconColor: Colors.black,
-            textColor: Colors.black,
-            onTap: () {
-              CustomToast.showSuccess(context, "Navigation vers Rendez-vous");
-              // TODO: Naviguer vers la page de planification
-            },
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
           ),
         ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Expanded(
+              child: CustomActionCard(
+                icon: Icons.upload_file,
+                label: 'Téléverser',
+                background: AppColors.primary,
+                iconColor: Colors.white,
+                textColor: Colors.white,
+                onTap: () {
+                  Get.toNamed(Routes.UPLOAD_DOCUMENTS);
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: CustomActionCard(
+                icon: Icons.calendar_today,
+                label: 'Rendez-vous',
+                background: AppColors.secondary,
+                iconColor: Colors.black,
+                textColor: Colors.black,
+                onTap: () {
+                  CustomToast.showSuccess(context, "Navigation vers Rendez-vous");
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -122,35 +166,52 @@ class HomeView extends StatelessWidget {
       {"status": "En attente", "date": "2025-05-05 09:00", "success": null},
     ];
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Historique des rendez-vous',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.text,
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: const Offset(0, 2),
             ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Historique des rendez-vous',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.text,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.separated(
+                  itemCount: appointments.length,
+                  separatorBuilder: (_, __) => const Divider(height: 24),
+                  itemBuilder: (context, index) {
+                    final item = appointments[index];
+                    return AppointmentCard(
+                      status: item["status"] as String,
+                      date: item["date"] as String,
+                      success: item["success"] as bool?,
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: ListView.separated(
-              itemCount: appointments.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final item = appointments[index];
-                return AppointmentCard(
-                  status: item["status"] as String,
-                  date: item["date"] as String,
-                  success: item["success"] as bool?,
-                );
-              },
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

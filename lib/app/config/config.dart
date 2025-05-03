@@ -1,6 +1,6 @@
 class Config {
   // URL de l'API pour le backend NestJS
-  static const String baseUrl = "http://localhost:3000"; // Pour développement local
+  static const String baseUrl = "http://192.168.1.25:3000"; // Pour développement local
 
   // Autres configurations potentielles
   static const String apiVersion = "v1";
@@ -10,7 +10,7 @@ class Config {
 
   // Vous pouvez également configurer les environnements (par exemple, développement, production)
   static String getApiUrl() {
-    return "$baseUrl/$apiVersion";
+    return "$baseUrl";
   }
 
   // Exemple de configuration pour des clés API ou autre si nécessaire

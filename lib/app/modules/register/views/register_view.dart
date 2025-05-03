@@ -1,16 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:salvage_app/app/modules/login/controllers/login_controller.dart';
+import 'package:salvage_app/app/modules/register/controllers/register_controller.dart';
 import 'package:salvage_app/app/theme/app_theme.dart';
 import 'package:salvage_app/app/widgets/custom_input.dart';
 import 'package:salvage_app/app/widgets/custom_button.dart';
 import 'package:salvage_app/app/widgets/custom_toast.dart';
 
-import '../../../routes/app_pages.dart';
-
-class LoginView extends GetView<LoginController> {
-  const LoginView({super.key});
+class RegisterView extends GetView<RegisterController> {
+  const RegisterView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +28,7 @@ class LoginView extends GetView<LoginController> {
               const SizedBox(height: 24),
               const Center(
                 child: Text(
-                  'Ohio Vehicle Inspection',
+                  'Inscription',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -40,63 +38,66 @@ class LoginView extends GetView<LoginController> {
               ),
               const SizedBox(height: 40),
               CustomInput(
+                hintText: 'Nom',
+                icon: Icons.person_outline,
+                onChanged: (value) => controller.nom.value = value,
+              ),
+              CustomInput(
+                hintText: 'Prénom',
+                icon: Icons.person_outline,
+                onChanged: (value) => controller.prenom.value = value,
+              ),
+              CustomInput(
                 hintText: 'Email',
                 icon: Icons.email_outlined,
                 onChanged: (value) => controller.email.value = value,
               ),
-              Obx(
-                    () => CustomInput(
-                  hintText: 'Mot de passe',
-                  icon: Icons.lock_outline,
-                  obscureText: controller.obscurePassword.value,
-                  onChanged: (value) => controller.password.value = value,
-                  suffixIcon: GestureDetector(
-                    onTap: controller.togglePasswordVisibility,
-                    child: Icon(
-                      controller.obscurePassword.value
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      color: Colors.grey,
-                    ),
+              CustomInput(
+                hintText: 'Téléphone',
+                icon: Icons.phone_outlined,
+                onChanged: (value) => controller.phone.value = value,
+              ),
+              Obx(() => CustomInput(
+                hintText: 'Mot de passe',
+                icon: Icons.lock_outline,
+                obscureText: controller.obscurePassword.value,
+                onChanged: (value) => controller.password.value = value,
+                suffixIcon: GestureDetector(
+                  onTap: controller.togglePasswordVisibility,
+                  child: Icon(
+                    controller.obscurePassword.value
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    color: Colors.grey,
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              const Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  'Mot de passe oublié ?',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w500,
+              )),
+              Obx(() => CustomInput(
+                hintText: 'Confirmer le mot de passe',
+                icon: Icons.lock_outline,
+                obscureText: controller.obscurePassword.value,
+                onChanged: (value) =>
+                controller.confirmPassword.value = value,
+                suffixIcon: GestureDetector(
+                  onTap: controller.togglePasswordVisibility,
+                  child: Icon(
+                    controller.obscurePassword.value
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    color: Colors.grey,
                   ),
                 ),
-              ),
+              )),
               const SizedBox(height: 24),
-
-              // Afficher un bouton "Confirmer" si l'utilisateur a cliqué sur "Se connecter avec Google"
-              Obx(() {
-                return controller.isGoogleSignInClicked.value
-                    ? CustomButton(
-                  text: "Confirmer la connexion avec Google",
-                  onTap: controller.signInWithGoogle,
-                )
-                    : CustomButton(
-                  text: "Se connecter avec API",
-                  onTap: controller.loginWithBackend,
-                );
-              }),
-
+              CustomButton(text: "S'inscrire", onTap: controller.register),
               const SizedBox(height: 16),
-
-              // Si l'utilisateur n'a pas encore cliqué sur "Se connecter avec Google"
               CustomButton(
-                text: "Se connecter avec Google",
+                text: "S'inscrire avec Google",
                 backgroundColor: AppColors.white,
                 textColor: AppColors.text,
                 borderColor: AppColors.inputBorder,
                 imageAsset: 'assets/images/google.png',
-                onTap: controller.toggleGoogleSignInState, // Changer l'état pour afficher le bouton de confirmation
+                onTap: controller.signUpWithGoogle,
               ),
               const SizedBox(height: 24),
               Center(
@@ -104,20 +105,18 @@ class LoginView extends GetView<LoginController> {
                   TextSpan(
                     children: [
                       const TextSpan(
-                        text: "Vous n'avez pas de compte ? ",
+                        text: "Vous avez déjà un compte ? ",
                         style: TextStyle(color: Colors.grey),
                       ),
                       TextSpan(
-                        text: "S'inscrire",
+                        text: "Se connecter",
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
                         ),
-                        recognizer:
-                        TapGestureRecognizer()
+                        recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            // Naviguer vers la page d'inscription
-                            Get.toNamed(Routes.REGISTER);
+                            Get.toNamed('/login');
                           },
                       ),
                     ],

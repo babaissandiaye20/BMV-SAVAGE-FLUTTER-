@@ -26,7 +26,7 @@ class OtpView extends GetView<OtpController> {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Un code à 6 chiffres a été envoyé à\n+221 78 59 93 **',
+                'Un code à 6 chiffres a été envoyé à votre téléphone.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey),
               ),
