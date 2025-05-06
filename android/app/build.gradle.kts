@@ -38,4 +38,6 @@ android {
 
 dependencies {
     implementation("androidx.multidex:multidex:2.0.1") // ✅ OBLIGATOIRE
+    // 🔽 Ajoute Stripe SDK Android
+    //implementation("com.stripe:stripe-android:20.11.0") // ou dernière version stable
 }
