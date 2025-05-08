@@ -6,9 +6,42 @@ import 'package:salvage_app/app/widgets/appointment_card.dart';
 import 'package:salvage_app/app/widgets/custom_bottom_nav_bar.dart';
 import 'package:salvage_app/app/widgets/custom_toast.dart';
 import 'package:salvage_app/app/routes/app_pages.dart';
+import 'package:salvage_app/app/modules/home/controllers/home_controller.dart';
+import 'package:salvage_app/app/widgets/custom_confirmation_modal.dart'; // Assure-toi d'importer le bon fichier
 
 class HomeView extends StatelessWidget {
-  const HomeView({super.key});
+  HomeView({super.key});
+
+  final controller = Get.put(HomeController());
+  String? selectedOption;
+
+  void _showPreAppointmentModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomConfirmationModal(
+        title: "Avant de continuer",
+        description: "Est-ce un rendez-vous pour vous-même ?",
+        radioOptions: ["Oui, c'est pour moi", "Non, pour quelqu’un d’autre"],
+        selectedOption: selectedOption,
+        onRadioChanged: (value) {
+          selectedOption = value;
+          Navigator.pop(context);
+          _showPreAppointmentModal(context);
+        },
+        onConfirm: () {
+          if (selectedOption != null) {
+            Navigator.pop(context);
+            Get.toNamed(Routes.CREATE_APPOINTMENT);
+          } else {
+            CustomToast.showError(context, "Veuillez sélectionner une option.");
+          }
+        },
+        onCancel: () {
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,10 +126,9 @@ class HomeView extends StatelessWidget {
                   child: IconButton(
                     icon: Icon(Icons.notifications_none_outlined,
                         size: 28,
-                        color: AppColors.primary
-                    ),
+                        color: AppColors.primary),
                     onPressed: () {
-                      CustomToast.showError(context, "Aucune nouvelle notification");
+                      CustomToast.showError(context, "No new notifications");
                     },
                   ),
                 ),
@@ -125,32 +157,74 @@ class HomeView extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+        child: Column(
           children: [
-            Expanded(
-              child: CustomActionCard(
-                icon: Icons.upload_file,
-                label: 'Téléverser',
-                background: AppColors.primary,
-                iconColor: Colors.white,
-                textColor: Colors.white,
-                onTap: () {
-                  Get.toNamed(Routes.UPLOAD_DOCUMENTS);
-                },
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Expanded(
+                  child: CustomActionCard(
+                    icon: Icons.upload_file,
+                    label: 'Upload',
+                    background: AppColors.primary,
+                    iconColor: Colors.white,
+                    textColor: Colors.white,
+                    onTap: () {
+                      Get.toNamed(Routes.UPLOAD_DOCUMENTS);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: CustomActionCard(
+                    icon: Icons.calendar_today,
+                    label: 'Appointment',
+                    background: AppColors.secondary,
+                    iconColor: Colors.black,
+                    textColor: Colors.black,
+                    onTap: () {
+                      _showPreAppointmentModal(context); // Remplace la navigation directe
+                    },
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: CustomActionCard(
-                icon: Icons.calendar_today,
-                label: 'Rendez-vous',
-                background: AppColors.secondary,
-                iconColor: Colors.black,
-                textColor: Colors.black,
-                onTap: () {
-                  CustomToast.showSuccess(context, "Navigation vers Rendez-vous");
-                },
+            const SizedBox(height: 24),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: controller.contactOnWhatsApp,
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 36,
+                          height: 36,
+                          child: Image.asset(
+                            'assets/images/whatsapp.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Contact via WhatsApp',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -161,9 +235,9 @@ class HomeView extends StatelessWidget {
 
   Widget _buildAppointmentHistory() {
     final appointments = [
-      {"status": "Complété", "date": "2025-04-25 14:30", "success": true},
-      {"status": "Échoué", "date": "2025-04-20 10:00", "success": false},
-      {"status": "En attente", "date": "2025-05-05 09:00", "success": null},
+      {"status": "Completed", "date": "2025-04-25 14:30", "success": true},
+      {"status": "Failed", "date": "2025-04-20 10:00", "success": false},
+      {"status": "Pending", "date": "2025-05-05 09:00", "success": null},
     ];
 
     return Expanded(
@@ -187,7 +261,7 @@ class HomeView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Historique des rendez-vous',
+                'Appointment History',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

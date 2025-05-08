@@ -1,23 +1,21 @@
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../../config/config.dart';
+
 
 class HomeController extends GetxController {
-  //TODO: Implement HomeController
+  final String phoneNumber = Config.supportPhoneNumber;
 
-  final count = 0.obs;
-  @override
-  void onInit() {
-    super.onInit();
+  Future<void> contactOnWhatsApp() async {
+    final message = Uri.encodeComponent("Hello, can you please call me for service?");
+    final url = 'https://wa.me/$phoneNumber?text=$message';
+    final uri = Uri.parse(url);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      Get.snackbar("WhatsApp", "Unable to open WhatsApp. Please call: +$phoneNumber");
+    }
   }
-
-  @override
-  void onReady() {
-    super.onReady();
-  }
-
-  @override
-  void onClose() {
-    super.onClose();
-  }
-
-  void increment() => count.value++;
 }

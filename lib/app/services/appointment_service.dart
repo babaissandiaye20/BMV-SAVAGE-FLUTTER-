@@ -10,6 +10,7 @@ class AppointmentService {
     required String titleNumber,
     required String scheduledAt,
     required String location,
+    required String token, // ✅ Ajout du token
   }) async {
     final body = {
       "userId": userId,
@@ -20,6 +21,10 @@ class AppointmentService {
       "location": location,
     };
 
-    return await _apiService.postRequest('/appointment', body);
+    return await _apiService.postRequest(
+      '/appointment',
+      body,
+      token: token, // ✅ Passage du token dans la requête
+    );
   }
 }

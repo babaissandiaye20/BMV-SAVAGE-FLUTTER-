@@ -14,6 +14,9 @@ class RegisterView extends GetView<RegisterController> {
   Widget build(BuildContext context) {
     CustomToast.setContext(context);
 
+    final isLoading = false.obs;
+    final isGoogleLoading = false.obs;
+
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -89,16 +92,33 @@ class RegisterView extends GetView<RegisterController> {
                 ),
               )),
               const SizedBox(height: 24),
-              CustomButton(text: "S'inscrire", onTap: controller.register),
+              Obx(() => CustomButton(
+                text: isLoading.value ? "Chargement..." : "S'inscrire",
+                onTap: () {
+                  if (isLoading.value) return;
+                  isLoading.value = true;
+                  controller
+                      .register()
+                      .whenComplete(() => isLoading.value = false);
+                },
+              )),
               const SizedBox(height: 16),
-              CustomButton(
-                text: "S'inscrire avec Google",
+              Obx(() => CustomButton(
+                text: isGoogleLoading.value
+                    ? "Connexion en cours..."
+                    : "S'inscrire avec Google",
                 backgroundColor: AppColors.white,
                 textColor: AppColors.text,
                 borderColor: AppColors.inputBorder,
                 imageAsset: 'assets/images/google.png',
-                onTap: controller.signUpWithGoogle,
-              ),
+                onTap: () {
+                  if (isGoogleLoading.value) return;
+                  isGoogleLoading.value = true;
+                  controller
+                      .signUpWithGoogle()
+                      .whenComplete(() => isGoogleLoading.value = false);
+                },
+              )),
               const SizedBox(height: 24),
               Center(
                 child: Text.rich(

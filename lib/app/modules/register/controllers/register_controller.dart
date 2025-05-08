@@ -7,7 +7,6 @@ import 'package:salvage_app/app/widgets/custom_toast.dart';
 
 import '../../../services/user_service.dart';
 
-
 class RegisterController extends GetxController {
   var nom = ''.obs;
   var prenom = ''.obs;
@@ -23,12 +22,39 @@ class RegisterController extends GetxController {
     obscurePassword.value = !obscurePassword.value;
   }
 
+  bool validateForm({
+    required String phone,
+    required String password,
+    required String confirmPassword,
+  }) {
+    final context = Get.context!;
+
+    if (phone.isEmpty || phone.length < 6) {
+      CustomToast.showError(context, "Numéro de téléphone invalide");
+      return false;
+    }
+
+    if (password.isEmpty || password.length < 6) {
+      CustomToast.showError(context, "Mot de passe trop court");
+      return false;
+    }
+
+    if (password != confirmPassword) {
+      CustomToast.showError(context, "Les mots de passe ne correspondent pas");
+      return false;
+    }
+
+    return true;
+  }
+
   Future<void> register() async {
     final context = Get.context!;
-    if (password.value != confirmPassword.value) {
-      CustomToast.showError(context, "Les mots de passe ne correspondent pas");
-      return;
-    }
+
+    if (!validateForm(
+      phone: phone.value.trim(),
+      password: password.value,
+      confirmPassword: confirmPassword.value,
+    )) return;
 
     try {
       final response = await _userService.createUser(
@@ -41,11 +67,11 @@ class RegisterController extends GetxController {
 
       if (response['status'] == 'success') {
         CustomToast.showSuccess(context, "Inscription réussie");
-        Get.offAllNamed('/login');
+        Get.offAllNamed(Routes.LOGIN);
       } else {
-        final List errors = response['errors'] ?? [];
+        final errors = response['errors'] ?? [];
         if (errors.isNotEmpty) {
-          CustomToast.showError(context, errors.first.toString()); // Affiche la première erreur
+          CustomToast.showError(context, errors.first.toString());
         } else {
           CustomToast.showError(context, response['message'] ?? "Erreur inconnue");
         }
@@ -58,9 +84,11 @@ class RegisterController extends GetxController {
   Future<void> signUpWithGoogle() async {
     final context = Get.context!;
     try {
+      // 1. Lancer la connexion Google
       final googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return;
 
+      // 2. Récupérer les tokens d’authentification
       final googleAuth = await googleUser.authentication;
 
       final credential = GoogleAuthProvider.credential(
@@ -68,11 +96,31 @@ class RegisterController extends GetxController {
         idToken: googleAuth.idToken,
       );
 
+      // 3. Connexion Firebase
       await FirebaseAuth.instance.signInWithCredential(credential);
-      CustomToast.showSuccess(context, 'Inscription via Google réussie');
-      Get.offAllNamed(Routes.HOME);
+
+      // 4. Extraire nom, prénom et email depuis Google
+      final displayName = googleUser.displayName ?? '';
+      final parts = displayName.trim().split(' ');
+      final firstName = parts.isNotEmpty ? parts[0] : '';
+      final lastName = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+      final email = googleUser.email;
+
+      // 5. Attendre une frame pour éviter les soucis de navigation
+      await Future.delayed(Duration.zero);
+
+      // 6. Redirection vers la page complete_profile
+      Get.toNamed(
+        Routes.REGISTER_COMPLETE_PROFILE,
+        arguments: {
+          'firstName': firstName,
+          'lastName': lastName,
+          'email': email,
+        },
+      );
     } catch (e) {
-      CustomToast.showError(context, 'Échec de l\'inscription Google');
+      CustomToast.showError(context, "Échec de l'inscription via Google : $e");
     }
   }
+
 }

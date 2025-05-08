@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:salvage_app/app/widgets/custom_toast.dart';
 import 'package:salvage_app/app/routes/app_pages.dart';
 import 'package:salvage_app/app/services/auth_service.dart';
+import 'package:salvage_app/app/services/secure_storage_service.dart'; // ⬅️ Ajouté
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -14,7 +15,8 @@ class LoginController extends GetxController {
 
   final AuthService authService = AuthService();
 
-  void togglePasswordVisibility() => obscurePassword.value = !obscurePassword.value;
+  void togglePasswordVisibility() =>
+      obscurePassword.value = !obscurePassword.value;
 
   // Connexion via Firebase (optionnel)
   Future<void> loginWithFirebase() async {
@@ -66,19 +68,31 @@ class LoginController extends GetxController {
         password.value,
       );
 
-      // Ici, tu peux sauvegarder les tokens dans GetStorage ou SharedPreferences
+      // 🔐 Stocker token et ID utilisateur de façon sécurisée
+      await SecureStorageService.writeToken(authResponse.token);
+      await SecureStorageService.writeUserId(authResponse.user.id);
 
       CustomToast.showSuccess(context, 'Connexion réussie via l\'API');
       Get.offAllNamed(Routes.HOME);
 
     } on InactiveAccountException catch (e) {
-      // Gestion du compte inactif avec redirection vers l'OTP et passage de l'id
       CustomToast.showError(context, e.message);
       Get.toNamed(Routes.LOGIN_OTP, arguments: {'userId': e.userId});
-
     } catch (e) {
       CustomToast.showError(context, 'Erreur de connexion via l\'API: ${e.toString()}');
     }
+  }
+
+  Future<void> logout() async {
+    try {
+      final token = await SecureStorageService.readToken();
+      if (token != null) {
+        await authService.logout(token);
+      }
+    } catch (_) {}
+
+    await SecureStorageService.clearAll(); // 🔐 Supprime token & userId
+    Get.offAllNamed(Routes.LOGIN);
   }
 
   void toggleGoogleSignInState() {

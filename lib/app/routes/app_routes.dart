@@ -9,6 +9,9 @@ abstract class Routes {
   static const CHAT = _Paths.CHAT;
   static const PROFILE = _Paths.PROFILE;
   static const REGISTER = _Paths.REGISTER;
+  static const REGISTER_COMPLETE_PROFILE = _Paths.REGISTER_COMPLETE_PROFILE;
+  static const CREATE_APPOINTMENT = _Paths.CREATE_APPOINTMENT;
+  static const PAYMENT = _Paths.PAYMENT;
 }
 
 abstract class _Paths {
@@ -20,4 +23,7 @@ abstract class _Paths {
   static const CHAT = '/chat';
   static const PROFILE = '/profile';
   static const REGISTER = '/register';
+  static const REGISTER_COMPLETE_PROFILE = '/complete-profile'; // ✅ Racine
+  static const CREATE_APPOINTMENT = '/create-appointment';
+  static const PAYMENT = '/payment';
 }
