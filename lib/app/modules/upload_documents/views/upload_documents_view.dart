@@ -1,3 +1,4 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:salvage_app/app/widgets/custom_button.dart';
@@ -9,7 +10,9 @@ class UploadDocumentsView extends GetView<UploadDocumentsController> {
   const UploadDocumentsView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {*/
+/**//*
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Scan des documents"),
@@ -43,3 +46,4 @@ class UploadDocumentsView extends GetView<UploadDocumentsController> {
     );
   }
 }
+*/

@@ -35,7 +35,6 @@ class CreateAppointmentView extends GetView<CreateAppointmentController> {
                 scanType: 'combined',
                 onExtracted: (data) {
                   controller.syncFormWithData(data);
-                  controller.hasScanned.value = true;
                 },
               ),
 
@@ -67,21 +66,6 @@ class CreateAppointmentView extends GetView<CreateAppointmentController> {
                 controller: controller.titleNumberController,
                 onChanged: (val) => controller.titleNumber.value = val,
               ),
-              const SizedBox(height: 12),
-
-              CustomInput(
-                hintText: "Lieu du rendez-vous",
-                icon: Icons.location_on_outlined,
-                controller: controller.locationController,
-                onChanged: (val) => controller.location.value = val,
-              ),
-              const SizedBox(height: 12),
-
-              CustomInput(
-                hintText: "Date & heure (ex: 2025-05-10T14:30:00)",
-                icon: Icons.calendar_today,
-                onChanged: (val) => controller.scheduledAt.value = val,
-              ),
 
               const SizedBox(height: 24),
 
@@ -90,9 +74,8 @@ class CreateAppointmentView extends GetView<CreateAppointmentController> {
                 onTap: () {
                   if (isLoading.value) return;
                   isLoading.value = true;
-                  controller.createAppointment().whenComplete(() {
-                    isLoading.value = false;
-                  });
+                  controller.proceedAfterVehicleForm();
+                  isLoading.value = false;
                 },
               )),
             ],

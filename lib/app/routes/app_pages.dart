@@ -6,6 +6,8 @@ import '../modules/create_appointment/bindings/create_appointment_binding.dart';
 import '../modules/create_appointment/views/create_appointment_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
+import '../modules/landing/bindings/landing_binding.dart';
+import '../modules/landing/views/landing_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/otp/bindings/otp_binding.dart';
 import '../modules/login/otp/views/otp_view.dart';
@@ -21,12 +23,14 @@ import '../modules/register/views/register_view.dart';
 import '../modules/upload_documents/bindings/upload_documents_binding.dart';
 import '../modules/upload_documents/views/upload_documents_view.dart';
 
+import 'package:salvage_app/app/modules/create_appointment/views/receipt_info_view.dart'; // 👈 Ajout de la vue
+
 part 'app_routes.dart';
 
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.LOGIN;
+  static const INITIAL = Routes.LANDING;
 
   static final routes = [
     GetPage(
@@ -46,16 +50,11 @@ class AppPages {
         ),
       ],
     ),
-    GetPage(
-      name: _Paths.UPLOAD_DOCUMENTS,
-      page: () => const UploadDocumentsView(),
-      binding: UploadDocumentsBinding(),
-    ),
-    GetPage(
+ /*   GetPage(
       name: _Paths.CHAT,
       page: () => const ChatView(),
       binding: ChatBinding(),
-    ),
+    ),*/
     GetPage(
       name: _Paths.PROFILE,
       page: () => const ProfilePage(),
@@ -66,8 +65,6 @@ class AppPages {
       page: () => const RegisterView(),
       binding: RegisterBinding(),
     ),
-
-    // ✅ ROUTE COMPLÉMENTAIRE CORRECTEMENT PLACÉE AU NIVEAU RACINE
     GetPage(
       name: _Paths.REGISTER_COMPLETE_PROFILE,
       page: () => const CompleteProfileView(),
@@ -82,6 +79,15 @@ class AppPages {
       name: _Paths.PAYMENT,
       page: () => const PaymentView(),
       binding: PaymentBinding(),
+    ),
+    GetPage(
+      name: _Paths.RECEIPT_INFO,
+      page: () => ReceiptInfoView(), // 👈 Sans binding
+    ),
+    GetPage(
+      name: _Paths.LANDING,
+      page: () => LandingView(),
+      binding: LandingBinding(),
     ),
   ];
 }

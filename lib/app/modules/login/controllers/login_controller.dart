@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 import 'package:salvage_app/app/widgets/custom_toast.dart';
 import 'package:salvage_app/app/routes/app_pages.dart';
 import 'package:salvage_app/app/services/auth_service.dart';
-import 'package:salvage_app/app/services/secure_storage_service.dart'; // ⬅️ Ajouté
+import 'package:salvage_app/app/services/secure_storage_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -11,14 +11,12 @@ class LoginController extends GetxController {
   var password = ''.obs;
   var obscurePassword = true.obs;
 
-  var isGoogleSignInClicked = false.obs;
-
   final AuthService authService = AuthService();
 
   void togglePasswordVisibility() =>
       obscurePassword.value = !obscurePassword.value;
 
-  // Connexion via Firebase (optionnel)
+  // Connexion via Firebase
   Future<void> loginWithFirebase() async {
     final context = Get.context!;
     try {
@@ -37,7 +35,7 @@ class LoginController extends GetxController {
     }
   }
 
-  // Connexion via Google (optionnel)
+  // Connexion via Google (directe)
   Future<void> signInWithGoogle() async {
     final context = Get.context!;
     try {
@@ -52,6 +50,7 @@ class LoginController extends GetxController {
       );
 
       await FirebaseAuth.instance.signInWithCredential(credential);
+
       CustomToast.showSuccess(context, 'Connexion via Google réussie');
       Get.offAllNamed(Routes.HOME);
     } catch (e) {
@@ -68,18 +67,28 @@ class LoginController extends GetxController {
         password.value,
       );
 
-      // 🔐 Stocker token et ID utilisateur de façon sécurisée
       await SecureStorageService.writeToken(authResponse.token);
       await SecureStorageService.writeUserId(authResponse.user.id);
 
       CustomToast.showSuccess(context, 'Connexion réussie via l\'API');
       Get.offAllNamed(Routes.HOME);
-
     } on InactiveAccountException catch (e) {
       CustomToast.showError(context, e.message);
       Get.toNamed(Routes.LOGIN_OTP, arguments: {'userId': e.userId});
     } catch (e) {
       CustomToast.showError(context, 'Erreur de connexion via l\'API: ${e.toString()}');
+    }
+  }
+
+  // Connexion en tant qu'invité
+  Future<void> continueAsGuest() async {
+    final context = Get.context!;
+    try {
+      await SecureStorageService.writeGuestMode(true);
+      CustomToast.showSuccess(context, 'Connexion en tant qu\'invité');
+      Get.offAllNamed(Routes.HOME);
+    } catch (e) {
+      CustomToast.showError(context, 'Échec du mode invité: ${e.toString()}');
     }
   }
 
@@ -91,11 +100,7 @@ class LoginController extends GetxController {
       }
     } catch (_) {}
 
-    await SecureStorageService.clearAll(); // 🔐 Supprime token & userId
+    await SecureStorageService.clearAll();
     Get.offAllNamed(Routes.LOGIN);
-  }
-
-  void toggleGoogleSignInState() {
-    isGoogleSignInClicked.value = !isGoogleSignInClicked.value;
   }
 }

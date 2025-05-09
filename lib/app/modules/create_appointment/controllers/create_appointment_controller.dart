@@ -3,56 +3,87 @@ import 'package:get/get.dart';
 import 'package:salvage_app/app/services/appointment_service.dart';
 import 'package:salvage_app/app/services/secure_storage_service.dart';
 import 'package:salvage_app/app/widgets/custom_toast.dart';
+import '../../../models/appointment_response.dart';
+import '../../../widgets/custom_confirmation_modal.dart';
 
 class CreateAppointmentController extends GetxController {
   final vin = ''.obs;
   final vehicleType = ''.obs;
   final titleNumber = ''.obs;
-  final location = ''.obs;
-  final scheduledAt = ''.obs;
+  final receiptNumber = ''.obs;
+  final issuesDate = ''.obs;
 
   final vinController = TextEditingController();
   final vehicleTypeController = TextEditingController();
   final titleNumberController = TextEditingController();
-  final locationController = TextEditingController();
-  final hasScanned = false.obs;
+  final receiptNumberController = TextEditingController();
+  final issuesDateController = TextEditingController();
+
+  final selectedReceiptOption = 'Oui'.obs;
 
   final AppointmentService _appointmentService = AppointmentService();
   final double fixedAmount = 99.99;
 
   void syncFormWithData(Map<String, dynamic> data) {
-    print("📦 Données reçues dans syncFormWithData : $data");
+    vin.value = extractValue(data, ['VIN']);
 
-    // Mapping robuste des clés
-    final normalizedData = {
-      'VIN': data['VIN']?.toString().trim(),
-      'VehicleType': data['VehicleType']?.toString().trim() ?? data['Vehicle Type']?.toString().trim(),
-      'TitleNumber': data['TitleNumber']?.toString().trim() ?? data['Title Number']?.toString().trim(),
-      'Location': data['Location']?.toString().trim(),
-    };
+    vehicleType.value = extractValue(data, [
+      'VehicleType',
+      'Vehicle Type',
+      'type_de_vehicule',
+      'type_de_vehicle',
+    ]);
 
-    vin.value = normalizedData['VIN'] ?? '';
-    vehicleType.value = normalizedData['VehicleType'] ?? '';
-    titleNumber.value = normalizedData['TitleNumber'] ?? '';
-    location.value = normalizedData['Location'] ?? '';
+    titleNumber.value = extractValue(data, [
+      'TitleNumber',
+      'Title Number',
+      'numero_de_titre',
+    ]);
+
+    receiptNumber.value = extractValue(data, [
+      'ReceiptNumber',
+      'Receipt No',
+      'receipt_number',
+      'receipt no',
+    ]);
+
+    issuesDate.value = extractValue(data, [
+      'IssuesDate',
+      'Issue Date',
+      'issue_date',
+    ]);
 
     vinController.text = vin.value;
     vehicleTypeController.text = vehicleType.value;
     titleNumberController.text = titleNumber.value;
-    locationController.text = location.value;
+    receiptNumberController.text = receiptNumber.value;
+    issuesDateController.text = issuesDate.value;
   }
 
-
-  @override
-  void onClose() {
-    vinController.dispose();
-    vehicleTypeController.dispose();
-    titleNumberController.dispose();
-    locationController.dispose();
-    super.onClose();
+  Future<void> proceedAfterVehicleForm() async {
+    final context = Get.context!;
+    showDialog(
+      context: context,
+      builder: (_) => CustomConfirmationModal(
+        title: "Reçu d’inspection",
+        description: "Avez-vous un reçu d’inspection ?",
+        radioOptions: ["Oui", "Non"],
+        selectedOption: selectedReceiptOption.value,
+        onRadioChanged: (val) => selectedReceiptOption.value = val ?? "Oui",
+        onConfirm: () {
+          Navigator.of(context).pop();
+          if (selectedReceiptOption.value == "Oui") {
+            Get.toNamed('/receipt-info');
+          } else {
+            createAppointment(withExtraFee: true);
+          }
+        },
+        onCancel: () => Navigator.of(context).pop(),
+      ),
+    );
   }
 
-  Future<void> createAppointment() async {
+  Future<void> createAppointment({bool withExtraFee = false}) async {
     final context = Get.context!;
     final userId = await SecureStorageService.readUserId();
     final token = await SecureStorageService.readToken();
@@ -62,28 +93,29 @@ class CreateAppointmentController extends GetxController {
       return;
     }
 
-    if (vin.value.isEmpty ||
-        vehicleType.value.isEmpty ||
-        titleNumber.value.isEmpty ||
-        location.value.isEmpty ||
-        scheduledAt.value.isEmpty) {
-      CustomToast.showError(context, "Tous les champs sont obligatoires.");
+    if (vin.value.isEmpty || vehicleType.value.isEmpty || titleNumber.value.isEmpty) {
+      CustomToast.showError(context, "Les informations du véhicule sont incomplètes.");
       return;
     }
 
+    final amountToPay = withExtraFee ? fixedAmount + 55 : fixedAmount;
+
+    final request = AppointmentRequest(
+      userId: userId,
+      vin: vin.value.trim(),
+      vehicleType: vehicleType.value.trim(),
+      titleNumber: titleNumber.value.trim(),
+      receiptNumber: receiptNumber.value.trim().isNotEmpty ? receiptNumber.value.trim() : null,
+      issuesDate: issuesDate.value.trim().isNotEmpty ? issuesDate.value.trim() : null,
+    );
+
     try {
       final response = await _appointmentService.createAppointment(
-        userId: userId,
-        vin: vin.value.trim(),
-        vehicleType: vehicleType.value.trim(),
-        titleNumber: titleNumber.value.trim(),
-        scheduledAt: scheduledAt.value.trim(),
-        location: location.value.trim(),
+        request: request,
         token: token,
       );
 
       if (response['status'] == 'success') {
-        CustomToast.showSuccess(context, "Rendez-vous créé avec succès.");
         final appointmentId = response['data']['id'];
         if (appointmentId == null) {
           CustomToast.showError(context, "ID de rendez-vous manquant.");
@@ -92,7 +124,7 @@ class CreateAppointmentController extends GetxController {
 
         Get.toNamed('/payment', arguments: {
           'appointmentId': appointmentId,
-          'amount': fixedAmount,
+          'amount': amountToPay,
         });
       } else {
         final errors = response['errors'] ?? [];
@@ -105,5 +137,17 @@ class CreateAppointmentController extends GetxController {
     } catch (e) {
       CustomToast.showError(context, "Erreur lors de la création : $e");
     }
+  }
+
+  /// Utilitaire pour récupérer une valeur parmi plusieurs clés
+  String extractValue(Map<String, dynamic> data, List<String> keys) {
+    for (final key in keys) {
+      if (data.containsKey(key) &&
+          data[key] != null &&
+          data[key].toString().trim().isNotEmpty) {
+        return data[key].toString().trim();
+      }
+    }
+    return '';
   }
 }

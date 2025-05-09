@@ -8,6 +8,13 @@ class CustomInput extends StatelessWidget {
   final Widget? suffixIcon;
   final ValueChanged<String> onChanged;
 
+  // ✅ Paramètres personnalisables ajoutés :
+  final Color fillColor;
+  final Color textColor;
+  final Color hintColor;
+  final Color borderColor;
+  final Color iconColor;
+
   const CustomInput({
     super.key,
     required this.hintText,
@@ -15,6 +22,11 @@ class CustomInput extends StatelessWidget {
     required this.onChanged,
     this.obscureText = false,
     this.suffixIcon,
+    this.fillColor = AppColors.inputBackground,
+    this.textColor = AppColors.inputText,
+    this.hintColor = AppColors.inputHint,
+    this.borderColor = AppColors.borderColor,
+    this.iconColor = AppColors.inputHint,
   });
 
   @override
@@ -24,25 +36,28 @@ class CustomInput extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.inputBorder),
+        color: fillColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.grey),
-          const SizedBox(width: 8),
+          Icon(icon, color: iconColor),
+          const SizedBox(width: 12),
           Expanded(
             child: TextField(
               onChanged: onChanged,
               obscureText: obscureText,
+              style: TextStyle(color: textColor),
+              cursorColor: textColor,
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: hintText,
+                hintStyle: TextStyle(color: hintColor),
               ),
             ),
           ),
-          if (suffixIcon != null) ...[suffixIcon!, const SizedBox(width: 8)],
+          if (suffixIcon != null) suffixIcon!,
         ],
       ),
     );

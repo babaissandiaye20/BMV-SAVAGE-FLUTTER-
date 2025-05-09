@@ -15,7 +15,7 @@ class Config {
   static const String uploadEndpoint = "/upload";
   static const String appointmentEndpoint = "/appointments";
   // openai api key
-  static const String openRouterApiKey = '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';
+  static const String openRouterApiKey = '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';
 
   // Example API key
   static const String apiKey = "votre_clé_api_ici";

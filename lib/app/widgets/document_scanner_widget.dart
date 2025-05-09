@@ -50,11 +50,7 @@ class _DocumentScannerWidgetState extends State<DocumentScannerWidget> {
         CustomToast.showError(context, "Données recherchées non trouvées.");
       } else {
         controller.syncFormWithData(data);
-        controller.hasScanned.value = true;
-
-        if (widget.onExtracted != null) {
-          widget.onExtracted!(data);
-        }
+        widget.onExtracted?.call(data);
       }
     } catch (e) {
       CustomToast.showError(context, e.toString().replaceAll('Exception: ', ''));

@@ -20,8 +20,8 @@ class CustomBottomNavBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border(top: BorderSide(color: AppColors.inputBorder)),
+        color: AppColors.background, // Fond gris clair
+        border: Border(top: BorderSide(color: AppColors.inputBackground)), // Bordure noire
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -33,16 +33,16 @@ class CustomBottomNavBar extends StatelessWidget {
             onTap: () {
               switch (index) {
                 case 0:
-                  Get.offAllNamed(Routes.HOME); // ← Accueil
+                  Get.offAllNamed(Routes.HOME);
                   break;
                 case 1:
-                // Ne fait rien pour "Rendez-vous" pour l'instant
+                // Action à définir pour "Rendez-vous"
                   break;
                 case 2:
-                  Get.toNamed(Routes.CHAT); // ← Chat
+                  Get.toNamed(Routes.CHAT);
                   break;
                 case 3:
-                  Get.toNamed(Routes.PROFILE); // ← Profil
+                  Get.toNamed(Routes.PROFILE);
                   break;
               }
             },
@@ -51,14 +51,14 @@ class CustomBottomNavBar extends StatelessWidget {
               children: [
                 Icon(
                   item['icon'] as IconData,
-                  color: isActive ? AppColors.primary : Colors.grey,
+                  color: isActive ? AppColors.primary : AppColors.secondary, // Rouge si actif, noir sinon
                 ),
                 const SizedBox(height: 4),
                 Text(
                   item['label'] as String,
                   style: TextStyle(
                     fontSize: 12,
-                    color: isActive ? AppColors.primary : Colors.grey,
+                    color: isActive ? AppColors.primary : AppColors.secondary,
                   ),
                 ),
               ],

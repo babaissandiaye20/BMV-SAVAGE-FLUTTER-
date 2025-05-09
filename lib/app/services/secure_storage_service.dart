@@ -22,4 +22,8 @@ class SecureStorageService {
   static Future<void> clearAll() async {
     await _storage.deleteAll();
   }
+  static Future<void> writeGuestMode(bool isGuest) async {
+    await _storage.write(key: 'guest_mode', value: isGuest.toString());
+  }
+
 }

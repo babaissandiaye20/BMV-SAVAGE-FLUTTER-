@@ -24,14 +24,19 @@ class RegisterView extends GetView<RegisterController> {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: ListView(
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
+
+              // Logo
               Center(
-                child: Image.asset('assets/images/logorb.png', height: 100),
+                child: Image.asset('assets/images/landing.png', height: 90),
               ),
+
               const SizedBox(height: 24),
+
+              // Titre
               const Center(
                 child: Text(
-                  'Inscription',
+                  'Create Account now',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -39,32 +44,62 @@ class RegisterView extends GetView<RegisterController> {
                   ),
                 ),
               ),
+
               const SizedBox(height: 40),
+
+              // Champs de formulaire stylisés en noir
               CustomInput(
-                hintText: 'Nom',
+                hintText: 'First Name',
                 icon: Icons.person_outline,
                 onChanged: (value) => controller.nom.value = value,
+                fillColor: AppColors.inputBackground,
+                textColor: AppColors.inputText,
+                hintColor: AppColors.inputHint,
+                borderColor: AppColors.borderColor,
+                iconColor: AppColors.inputHint,
               ),
               CustomInput(
-                hintText: 'Prénom',
+                hintText: 'Last Name',
                 icon: Icons.person_outline,
                 onChanged: (value) => controller.prenom.value = value,
+                fillColor: AppColors.inputBackground,
+                textColor: AppColors.inputText,
+                hintColor: AppColors.inputHint,
+                borderColor: AppColors.borderColor,
+                iconColor: AppColors.inputHint,
               ),
               CustomInput(
                 hintText: 'Email',
                 icon: Icons.email_outlined,
                 onChanged: (value) => controller.email.value = value,
+                fillColor: AppColors.inputBackground,
+                textColor: AppColors.inputText,
+                hintColor: AppColors.inputHint,
+                borderColor: AppColors.borderColor,
+                iconColor: AppColors.inputHint,
               ),
               CustomInput(
                 hintText: 'Téléphone',
                 icon: Icons.phone_outlined,
                 onChanged: (value) => controller.phone.value = value,
+                fillColor: AppColors.inputBackground,
+                textColor: AppColors.inputText,
+                hintColor: AppColors.inputHint,
+                borderColor: AppColors.borderColor,
+                iconColor: AppColors.inputHint,
               ),
+
+              // Mot de passe
               Obx(() => CustomInput(
-                hintText: 'Mot de passe',
+                hintText: 'Password',
                 icon: Icons.lock_outline,
                 obscureText: controller.obscurePassword.value,
                 onChanged: (value) => controller.password.value = value,
+                fillColor: AppColors.inputBackground,
+                textColor: AppColors.inputText,
+                hintColor: AppColors.inputHint,
+                borderColor: AppColors.borderColor,
+                iconColor: AppColors.inputHint,
                 suffixIcon: GestureDetector(
                   onTap: controller.togglePasswordVisibility,
                   child: Icon(
@@ -76,11 +111,16 @@ class RegisterView extends GetView<RegisterController> {
                 ),
               )),
               Obx(() => CustomInput(
-                hintText: 'Confirmer le mot de passe',
+                hintText: 'Confirm password',
                 icon: Icons.lock_outline,
                 obscureText: controller.obscurePassword.value,
                 onChanged: (value) =>
                 controller.confirmPassword.value = value,
+                fillColor: AppColors.inputBackground,
+                textColor: AppColors.inputText,
+                hintColor: AppColors.inputHint,
+                borderColor: AppColors.borderColor,
+                iconColor: AppColors.inputHint,
                 suffixIcon: GestureDetector(
                   onTap: controller.togglePasswordVisibility,
                   child: Icon(
@@ -91,9 +131,14 @@ class RegisterView extends GetView<RegisterController> {
                   ),
                 ),
               )),
+
               const SizedBox(height: 24),
+
+              // Bouton Sign Up rouge
               Obx(() => CustomButton(
-                text: isLoading.value ? "Chargement..." : "S'inscrire",
+                text: isLoading.value ? "Chargement..." : "Sign Up",
+                backgroundColor: AppColors.primary,
+                textColor: AppColors.white,
                 onTap: () {
                   if (isLoading.value) return;
                   isLoading.value = true;
@@ -102,14 +147,27 @@ class RegisterView extends GetView<RegisterController> {
                       .whenComplete(() => isLoading.value = false);
                 },
               )),
+
               const SizedBox(height: 16),
+
+              // Texte séparateur
+              const Center(
+                child: Text(
+                  "or",
+                  style: TextStyle(color: AppColors.text),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Bouton Google
               Obx(() => CustomButton(
                 text: isGoogleLoading.value
                     ? "Connexion en cours..."
-                    : "S'inscrire avec Google",
+                    : "Sign up with Google",
                 backgroundColor: AppColors.white,
                 textColor: AppColors.text,
-                borderColor: AppColors.inputBorder,
+                borderColor: AppColors.borderColor,
                 imageAsset: 'assets/images/google.png',
                 onTap: () {
                   if (isGoogleLoading.value) return;
@@ -119,17 +177,20 @@ class RegisterView extends GetView<RegisterController> {
                       .whenComplete(() => isGoogleLoading.value = false);
                 },
               )),
-              const SizedBox(height: 24),
+
+              const SizedBox(height: 32),
+
+              // Lien vers page de connexion
               Center(
                 child: Text.rich(
                   TextSpan(
                     children: [
                       const TextSpan(
-                        text: "Vous avez déjà un compte ? ",
+                        text: "Already have an account? ",
                         style: TextStyle(color: Colors.grey),
                       ),
                       TextSpan(
-                        text: "Se connecter",
+                        text: "Sign in",
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,

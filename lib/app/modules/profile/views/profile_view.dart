@@ -192,7 +192,7 @@ class ProfilePage extends StatelessWidget {
     return Container(
       height: 140,
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.inputBorder),
+        border: Border.all(color: AppColors.borderColor),
         borderRadius: BorderRadius.circular(16),
         color: Colors.white,
         boxShadow: [

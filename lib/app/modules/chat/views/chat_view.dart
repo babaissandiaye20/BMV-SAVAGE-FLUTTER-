@@ -1,3 +1,4 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:salvage_app/app/theme/app_theme.dart';
@@ -86,3 +87,4 @@ class ChatView extends GetView<ChatController> {
     );
   }
 }
+*/

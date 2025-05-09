@@ -1,49 +1,34 @@
-enum AppointmentStatus {
-  PENDING,
-  CONFIRMED,
-  CANCELED,
-}
-
-class Appointment {
-  final String id;
+class AppointmentRequest {
   final String userId;
   final String vin;
   final String vehicleType;
   final String titleNumber;
-  final String scheduledAt; // REST backend attend une string ISO
-  final String location;
-  final AppointmentStatus status;
-  final DateTime createdAt;
-  final String? deletedAt;
+  final String? receiptNumber;
+  final String? issuesDate;
+  final String? scheduledAt;
+  final String? location;
 
-  Appointment({
-    required this.id,
+  AppointmentRequest({
     required this.userId,
     required this.vin,
     required this.vehicleType,
     required this.titleNumber,
-    required this.scheduledAt,
-    required this.location,
-    required this.status,
-    required this.createdAt,
-    this.deletedAt,
+    this.receiptNumber,
+    this.issuesDate,
+    this.scheduledAt,
+    this.location,
   });
 
-  factory Appointment.fromJson(Map<String, dynamic> json) {
-    return Appointment(
-      id: json['id'],
-      userId: json['userId'],
-      vin: json['vin'],
-      vehicleType: json['vehicleType'],
-      titleNumber: json['titleNumber'],
-      scheduledAt: json['scheduledAt'],
-      location: json['location'],
-      status: AppointmentStatus.values.firstWhere(
-            (e) => e.toString() == 'AppointmentStatus.${json['status']}',
-        orElse: () => AppointmentStatus.PENDING,
-      ),
-      createdAt: DateTime.parse(json['createdAt']),
-      deletedAt: json['deletedAt'],
-    );
+  Map<String, dynamic> toJson() {
+    return {
+      "userId": userId,
+      "vin": vin,
+      "vehicleType": vehicleType,
+      "titleNumber": titleNumber,
+      if (receiptNumber != null && receiptNumber!.isNotEmpty) "receiptNumber": receiptNumber,
+      if (issuesDate != null && issuesDate!.isNotEmpty) "issuesDate": issuesDate,
+      if (scheduledAt != null && scheduledAt!.isNotEmpty) "scheduledAt": scheduledAt,
+      if (location != null && location!.isNotEmpty) "location": location,
+    };
   }
 }
