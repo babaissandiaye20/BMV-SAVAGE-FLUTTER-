@@ -1,34 +1,62 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../config/config.dart';
 
 class OcrService {
   static final Map<String, String> _prompts = {
-    'license':
-    "Voici un permis de conduire. Extrait : nom, prénom, date de naissance, numéro du permis, catégorie. JSON uniquement.",
-    'title':
-    "Voici une carte grise. Extrait : VIN, type de véhicule, numéro de titre, lieu. JSON uniquement.",
-    'combined':
-    "Voici un document combiné (carte grise + permis). Extrait : VIN, type de véhicule, numéro de titre, lieu. JSON uniquement.",
-    'receipt':
-    "Voici un reçu d'inspection de véhicule. Extrait : 'Receipt No', 'Issue Date'. JSON uniquement.",
+    'license': '''
+Voici un permis de conduire.
+Extrait les champs suivants :
+- nom
+- prénom
+- date de naissance
+- numéro du permis
+- catégorie.
+
+Réponds uniquement en JSON. Utilise les clés : nom, prénom, license_number.
+''',
+    'title': '''
+Voici une carte grise (titre de véhicule).
+Extrait les champs suivants :
+- VIN
+- type de véhicule
+- numéro de titre
+- lieu
+
+Réponds uniquement en JSON.
+''',
+    'combined': '''
+Voici un document combiné (carte grise + permis).
+Extrait les champs suivants :
+- VIN
+- type de véhicule
+- numéro de titre
+- lieu
+
+Réponds uniquement en JSON.
+''',
+    'receipt': '''
+Voici un reçu d'inspection de véhicule.
+Extrait :
+- Receipt No
+- Issue Date
+
+Réponds uniquement en JSON.
+''',
   };
 
-  /// Traitement principal avec GPT-4o-mini (supporte base64 directement)
   Future<Map<String, dynamic>> processImage(String imagePath, {required String scanType}) async {
-    final imageFile = File(imagePath);
-    final bytes = await imageFile.readAsBytes();
-    final base64Image = base64Encode(bytes);
-
     if (!_prompts.containsKey(scanType)) {
       throw Exception('Type de scan non supporté : $scanType');
     }
 
+    final base64Image = await compute(_encodeImageToBase64, imagePath);
     final prompt = _prompts[scanType]!;
 
     final body = jsonEncode({
-      "model": "openai/gpt-4o-mini",
+      "model": "google/gemini-2.0-flash-001",
       "messages": [
         {
           "role": "user",
@@ -55,27 +83,74 @@ class OcrService {
     final url = Uri.parse('https://openrouter.ai/api/v1/chat/completions');
     final response = await http.post(url, headers: headers, body: body);
 
+    print('🔍 Réponse OCR brute : ${response.body}');
+
     if (response.statusCode != 200) {
-      throw Exception("Erreur API OpenRouter : ${response.body}");
+      throw Exception("Erreur API OpenRouter (${response.statusCode}) : ${response.body}");
     }
 
     final decoded = jsonDecode(response.body);
+
+    if (decoded == null ||
+        decoded['choices'] == null ||
+        !(decoded['choices'] is List) ||
+        decoded['choices'].isEmpty ||
+        decoded['choices'][0]['message'] == null ||
+        decoded['choices'][0]['message']['content'] == null) {
+      throw Exception("Réponse inattendue de l'API OCR : ${jsonEncode(decoded)}");
+    }
+
     final contentStr = decoded['choices'][0]['message']['content'] as String;
 
     final cleaned = contentStr
-        .replaceAll(RegExp(r'```json'), '')
+        .replaceAll(RegExp(r'```json', caseSensitive: false), '')
         .replaceAll(RegExp(r'```'), '')
         .trim();
 
+    final jsonResult = await compute(_parseAndNormalizeJson, cleaned);
+    return jsonResult;
+  }
+
+  // -- Isolate helpers --
+
+  static String _encodeImageToBase64(String path) {
+    final file = File(path);
+    final bytes = file.readAsBytesSync(); // OK ici, hors du main thread
+    return base64Encode(bytes);
+  }
+
+  static Map<String, dynamic> _parseAndNormalizeJson(String cleanedContent) {
     try {
-      final jsonResult = jsonDecode(cleaned);
-      if (jsonResult is Map<String, dynamic>) {
-        return jsonResult;
+      final parsed = jsonDecode(cleanedContent);
+      if (parsed is Map<String, dynamic>) {
+        return _normalizeKeys(parsed);
       } else {
-        throw const FormatException("Le contenu n'est pas un objet JSON valide.");
+        throw const FormatException("Le contenu JSON n'est pas un objet valide.");
       }
-    } catch (_) {
-      throw Exception("Données JSON non valides ou manquantes.");
+    } catch (e) {
+      throw Exception("Erreur JSON OCR : ${e.toString()}");
     }
+  }
+
+  static Map<String, dynamic> _normalizeKeys(Map<String, dynamic> original) {
+    final corrected = <String, dynamic>{};
+
+    original.forEach((key, value) {
+      final fixedKey = key
+          .replaceAll('Ã©', 'é')
+          .replaceAll('Ã¨', 'è')
+          .replaceAll('Ãª', 'ê')
+          .replaceAll('Ã ', 'à')
+          .replaceAll('Ã¢', 'â')
+          .replaceAll('Ã§', 'ç')
+          .replaceAll('Ã´', 'ô')
+          .replaceAll('Ã»', 'û')
+          .replaceAll('Ã€', 'À')
+          .replaceAll('Ã‰', 'É')
+          .replaceAll('Ã', 'à'); // pour attraper les cas bruts
+      corrected[fixedKey] = value;
+    });
+
+    return corrected;
   }
 }

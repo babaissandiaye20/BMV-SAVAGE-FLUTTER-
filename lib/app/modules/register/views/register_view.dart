@@ -17,6 +17,28 @@ class RegisterView extends GetView<RegisterController> {
     final isLoading = false.obs;
     final isGoogleLoading = false.obs;
 
+    InputDecoration customInputDecoration(String hintText) {
+      return InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        hintText: hintText,
+        hintStyle: const TextStyle(color: Colors.black54),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.black),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.black),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.black),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -45,61 +67,66 @@ class RegisterView extends GetView<RegisterController> {
                 ),
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 25),
 
-              // Champs de formulaire stylisés en noir
-              CustomInput(
-                hintText: 'First Name',
-                icon: Icons.person_outline,
-                onChanged: (value) => controller.nom.value = value,
-                fillColor: AppColors.inputBackground,
-                textColor: AppColors.inputText,
-                hintColor: AppColors.inputHint,
-                borderColor: AppColors.borderColor,
-                iconColor: AppColors.inputHint,
+              // Row pour First Name & Last Name
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      onChanged: (value) => controller.nom.value = value,
+                      decoration: customInputDecoration('First Name'),
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      onChanged: (value) => controller.prenom.value = value,
+                      decoration: customInputDecoration('Last Name'),
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  ),
+                ],
               ),
-              CustomInput(
-                hintText: 'Last Name',
-                icon: Icons.person_outline,
-                onChanged: (value) => controller.prenom.value = value,
-                fillColor: AppColors.inputBackground,
-                textColor: AppColors.inputText,
-                hintColor: AppColors.inputHint,
-                borderColor: AppColors.borderColor,
-                iconColor: AppColors.inputHint,
-              ),
+
+              const SizedBox(height: 16),
+
+              // Email
               CustomInput(
                 hintText: 'Email',
                 icon: Icons.email_outlined,
                 onChanged: (value) => controller.email.value = value,
-                fillColor: AppColors.inputBackground,
-                textColor: AppColors.inputText,
-                hintColor: AppColors.inputHint,
-                borderColor: AppColors.borderColor,
-                iconColor: AppColors.inputHint,
+                fillColor: Colors.white,
+                textColor: Colors.black,
+                hintColor: Colors.black54,
+                borderColor: Colors.black,
+                iconColor: Colors.black54,
               ),
+
+              // Téléphone
               CustomInput(
                 hintText: 'Téléphone',
                 icon: Icons.phone_outlined,
                 onChanged: (value) => controller.phone.value = value,
-                fillColor: AppColors.inputBackground,
-                textColor: AppColors.inputText,
-                hintColor: AppColors.inputHint,
-                borderColor: AppColors.borderColor,
-                iconColor: AppColors.inputHint,
+                fillColor: Colors.white,
+                textColor: Colors.black,
+                hintColor: Colors.black54,
+                borderColor: Colors.black,
+                iconColor: Colors.black54,
               ),
 
-              // Mot de passe
+              // Password
               Obx(() => CustomInput(
                 hintText: 'Password',
                 icon: Icons.lock_outline,
                 obscureText: controller.obscurePassword.value,
                 onChanged: (value) => controller.password.value = value,
-                fillColor: AppColors.inputBackground,
-                textColor: AppColors.inputText,
-                hintColor: AppColors.inputHint,
-                borderColor: AppColors.borderColor,
-                iconColor: AppColors.inputHint,
+                fillColor: Colors.white,
+                textColor: Colors.black,
+                hintColor: Colors.black54,
+                borderColor: Colors.black,
+                iconColor: Colors.black54,
                 suffixIcon: GestureDetector(
                   onTap: controller.togglePasswordVisibility,
                   child: Icon(
@@ -110,17 +137,19 @@ class RegisterView extends GetView<RegisterController> {
                   ),
                 ),
               )),
+
+              // Confirm Password
               Obx(() => CustomInput(
                 hintText: 'Confirm password',
                 icon: Icons.lock_outline,
                 obscureText: controller.obscurePassword.value,
                 onChanged: (value) =>
                 controller.confirmPassword.value = value,
-                fillColor: AppColors.inputBackground,
-                textColor: AppColors.inputText,
-                hintColor: AppColors.inputHint,
-                borderColor: AppColors.borderColor,
-                iconColor: AppColors.inputHint,
+                fillColor: Colors.white,
+                textColor: Colors.black,
+                hintColor: Colors.black54,
+                borderColor: Colors.black,
+                iconColor: Colors.black54,
                 suffixIcon: GestureDetector(
                   onTap: controller.togglePasswordVisibility,
                   child: Icon(
@@ -134,7 +163,7 @@ class RegisterView extends GetView<RegisterController> {
 
               const SizedBox(height: 24),
 
-              // Bouton Sign Up rouge
+              // Sign Up
               Obx(() => CustomButton(
                 text: isLoading.value ? "Chargement..." : "Sign Up",
                 backgroundColor: AppColors.primary,
@@ -150,24 +179,20 @@ class RegisterView extends GetView<RegisterController> {
 
               const SizedBox(height: 16),
 
-              // Texte séparateur
               const Center(
-                child: Text(
-                  "or",
-                  style: TextStyle(color: AppColors.text),
-                ),
+                child: Text("or", style: TextStyle(color: AppColors.text)),
               ),
 
               const SizedBox(height: 16),
 
-              // Bouton Google
+              // Google Sign Up
               Obx(() => CustomButton(
                 text: isGoogleLoading.value
                     ? "Connexion en cours..."
                     : "Sign up with Google",
                 backgroundColor: AppColors.white,
                 textColor: AppColors.text,
-                borderColor: AppColors.borderColor,
+                borderColor: Colors.black,
                 imageAsset: 'assets/images/google.png',
                 onTap: () {
                   if (isGoogleLoading.value) return;
@@ -178,9 +203,21 @@ class RegisterView extends GetView<RegisterController> {
                 },
               )),
 
+              const SizedBox(height: 16),
+
+              // Continue as guest
+              CustomButton(
+                text: "Continue as guest",
+                backgroundColor: Colors.black,
+                textColor: Colors.white,
+                onTap: () {
+                  // Action invité
+                },
+              ),
+
               const SizedBox(height: 32),
 
-              // Lien vers page de connexion
+              // Sign in link
               Center(
                 child: Text.rich(
                   TextSpan(

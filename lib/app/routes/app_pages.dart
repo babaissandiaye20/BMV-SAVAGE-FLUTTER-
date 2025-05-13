@@ -53,7 +53,7 @@ class AppPages {
  /*   GetPage(
       name: _Paths.CHAT,
       page: () => const ChatView(),
-      binding: ChatBinding(),
+      binding: ChatBinding(),gv
     ),*/
     GetPage(
       name: _Paths.PROFILE,
@@ -89,5 +89,11 @@ class AppPages {
       page: () => LandingView(),
       binding: LandingBinding(),
     ),
+    GetPage(
+      name: _Paths.UPLOAD_DOCUMENTS,
+      page: () => const UploadDocumentsView(),
+      binding: UploadDocumentsBinding(),
+    ),
+
   ];
 }

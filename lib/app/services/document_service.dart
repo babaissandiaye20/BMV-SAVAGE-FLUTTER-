@@ -34,6 +34,7 @@ class DocumentService {
 
   Future<List<Document>> getDocuments() async {
     final token = await SecureStorageService.readToken();
+    print(token);
     if (token == null) throw Exception("Token manquant");
 
     final response = await apiService.getRequest('/documents', token: token);

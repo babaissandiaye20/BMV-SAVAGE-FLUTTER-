@@ -16,4 +16,14 @@ class AppointmentService {
       token: token,
     );
   }
+  Future<Map<String, dynamic>> getPendingAppointmentsWithoutPayment({
+    required String userId,
+    required String token,
+  }) async {
+    return await _apiService.getRequest(
+      '/appointment/user/$userId/pending/no-payment',
+      token: token,
+    );
+  }
+
 }

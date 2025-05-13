@@ -1,105 +1,66 @@
 import 'package:get/get.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:salvage_app/app/services/payment_service.dart';
+import 'package:salvage_app/app/services/appointment_service.dart';
 import 'package:salvage_app/app/services/secure_storage_service.dart';
 import 'package:salvage_app/app/widgets/custom_toast.dart';
+import '../../../models/appointment_response.dart';
 
 class PaymentController extends GetxController {
-  var paymentModes = <Map<String, dynamic>>[].obs;
-  var selectedModeId = ''.obs;
+  final AppointmentService _appointmentService = AppointmentService();
+
+  var appointments = <AppointmentRequest>[].obs;
   var isLoading = false.obs;
-  var isTestMode = false.obs;
-
-  String appointmentId = '';
-  double amount = 0;
-  final currency = 'usd';
-
-  CardFieldInputDetails? cardDetails;
+  var totalAmount = 0.0.obs;
 
   @override
   void onInit() {
     super.onInit();
-
-    final args = Get.arguments;
-
-    if (args == null || args['appointmentId'] == null || args['amount'] == null) {
-      CustomToast.showError(Get.context!, 'Données de paiement manquantes.');
-      Future.delayed(const Duration(milliseconds: 500), () {
-        Get.back();
-      });
-      return;
-    }
-
-    appointmentId = args['appointmentId'].toString();
-    amount = double.tryParse(args['amount'].toString()) ?? 0.0;
-
-    fetchModes();
+    fetchAppointments();
   }
 
-  Future<void> fetchModes() async {
+  Future<void> fetchAppointments() async {
+    isLoading.value = true;
+
     try {
-      isLoading.value = true;
-      final modes = await PaymentService.fetchPaymentModes();
-      paymentModes.assignAll(modes);
-      if (modes.isNotEmpty) selectedModeId.value = modes.first['id'];
-    } catch (e) {
-      CustomToast.showError(Get.context!, 'Erreur chargement modes: $e');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> pay() async {
-    final context = Get.context!;
-    try {
-      isLoading.value = true;
-
-      if (Stripe.publishableKey.isEmpty) {
-        throw Exception("Stripe n'est pas correctement initialisé");
-      }
-
-      if (cardDetails == null || !(cardDetails!.complete ?? false)) {
-        throw Exception("Les informations de carte ne sont pas complètes");
-      }
-
-      final paymentMethod = await Stripe.instance.createPaymentMethod(
-        params: PaymentMethodParams.card(
-          paymentMethodData: PaymentMethodData(
-            billingDetails: BillingDetails(
-              email: 'test@example.com',
-            ),
-          ),
-        ),
-      );
-
+      final token = await SecureStorageService.readToken();
       final userId = await SecureStorageService.readUserId();
-      if (userId == null) {
-        CustomToast.showError(context, "Utilisateur non authentifié.");
+
+      if (token == null || userId == null) {
+        CustomToast.showError(Get.context!, "Utilisateur non authentifié.");
         return;
       }
 
-      await PaymentService.createPayment(
+      final data = await _appointmentService.getPendingAppointmentsWithoutPayment(
         userId: userId,
-        appointmentId: appointmentId,
-        paymentModeId: selectedModeId.value,
-        amount: amount,
-        currency: currency,
-        paymentMethodId: paymentMethod.id,
+        token: token,
       );
 
-      CustomToast.showSuccess(context, 'Paiement réussi');
-      Get.offAllNamed('/home');
+      // ✅ Récupère la vraie liste depuis la clé 'data'
+      final results = data['data'] as List<dynamic>;
+
+      appointments.assignAll(results.map((e) {
+        final appt = AppointmentRequest.fromJson(e);
+        final hasReceipt = appt.receiptNumber != null && appt.receiptNumber!.isNotEmpty;
+        final base = 30.0;
+        final extra = hasReceipt ? 0.0 : 10.0;
+        appt.setPrice(base + extra);
+        return appt;
+      }).toList());
+
+      calculateTotal();
+
     } catch (e) {
-      String errorMessage = 'Échec du paiement';
-      if (e is StripeException) {
-        errorMessage = 'Erreur Stripe: ${e.error.localizedMessage ?? e.error.message}';
-      } else {
-        errorMessage = 'Erreur: $e';
-      }
-      CustomToast.showError(context, errorMessage);
+      CustomToast.showError(Get.context!, "Erreur de chargement des rendez-vous: $e");
     } finally {
       isLoading.value = false;
     }
+  }
+
+
+  void calculateTotal() {
+    double sum = 0;
+    for (var appointment in appointments) {
+      sum += appointment.price ?? 0;
+    }
+    totalAmount.value = sum;
   }
 }

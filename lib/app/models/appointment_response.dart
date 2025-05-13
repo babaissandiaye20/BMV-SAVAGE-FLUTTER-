@@ -8,6 +8,8 @@ class AppointmentRequest {
   final String? scheduledAt;
   final String? location;
 
+  double? price; // 👈 utilisé localement
+
   AppointmentRequest({
     required this.userId,
     required this.vin,
@@ -17,6 +19,7 @@ class AppointmentRequest {
     this.issuesDate,
     this.scheduledAt,
     this.location,
+    this.price,
   });
 
   Map<String, dynamic> toJson() {
@@ -30,5 +33,23 @@ class AppointmentRequest {
       if (scheduledAt != null && scheduledAt!.isNotEmpty) "scheduledAt": scheduledAt,
       if (location != null && location!.isNotEmpty) "location": location,
     };
+  }
+
+  factory AppointmentRequest.fromJson(Map<String, dynamic> json) {
+    return AppointmentRequest(
+      userId: json['userId'],
+      vin: json['vin'],
+      vehicleType: json['vehicleType'],
+      titleNumber: json['titleNumber'],
+      receiptNumber: json['receiptNumber'],
+      issuesDate: json['issuesDate'],
+      scheduledAt: json['scheduledAt'],
+      location: json['location'],
+      price: json['price']?.toDouble(), // pris en compte localement
+    );
+  }
+
+  void setPrice(double value) {
+    price = value;
   }
 }
