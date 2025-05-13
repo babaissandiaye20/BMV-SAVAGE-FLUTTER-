@@ -102,10 +102,7 @@ class UploadDocumentsView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ElevatedButton(
-                      onPressed: () {
-                        // Action personnalisée pour le bouton "VOILÀ"
-                        Get.snackbar('Info', 'Action VOILÀ exécutée');
-                      },
+                      onPressed: controller.saveAppointmentOnly,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
                         minimumSize: const Size.fromHeight(50),
@@ -116,11 +113,12 @@ class UploadDocumentsView extends StatelessWidget {
                     ElevatedButton(
                       onPressed: controller.goToPayment,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary ,
+                        backgroundColor: AppColors.primary,
                         minimumSize: const Size.fromHeight(50),
                       ),
                       child: const Text('Pay Now', style: TextStyle(fontSize: 18, color: Colors.white)),
                     ),
+
                   ],
                 );
               } else {

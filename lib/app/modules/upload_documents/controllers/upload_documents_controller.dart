@@ -5,8 +5,11 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:salvage_app/app/services/document_service.dart';
 import 'package:salvage_app/app/services/ocr_service.dart';
+import 'package:salvage_app/app/services/appointment_service.dart';
 import 'package:salvage_app/app/widgets/custom_toast.dart';
+import '../../../models/appointment_response.dart';
 import '../../../routes/app_pages.dart';
+import '../../../services/secure_storage_service.dart';
 
 class UploadDocumentsController extends GetxController {
   final picker = ImagePicker();
@@ -106,53 +109,39 @@ class UploadDocumentsController extends GetxController {
     final name = _extractValue(data, ['nom']);
     final number = _extractValue(data, ['numéro du permis', 'license_number', 'permit_number', 'DL', 'DLN']);
 
-    if (name.isNotEmpty && number.isNotEmpty) {
-      isLicenseValid.value = true;
-      licenseError.value = '';
-    } else {
-      isLicenseValid.value = false;
-      licenseError.value = 'Permis invalide ou incomplet.';
-    }
+    isLicenseValid.value = name.isNotEmpty && number.isNotEmpty;
+    licenseError.value = isLicenseValid.value ? '' : 'Permis invalide ou incomplet.';
   }
 
   Future<void> _validateTitle(String path) async {
     final data = await _ocrService.processImage(path, scanType: 'title');
     final vin = _extractValue(data, ['VIN', 'vin']);
-    final number = _extractValue(data, ['TitleNumber', 'Title Number', 'numero_de_titre']);
-    final vehicle = _extractValue(data, ['VehicleType', 'type_de_vehicule']);
+    final number = _extractValue(data, ['TitleNumber', 'Title Number', 'numero_de_titre', 'numerodetitre', 'numéro de titre']);
+    final vehicle = _extractValue(data, ['VehicleType', 'type_de_vehicule', 'typedevehicule', 'type de véhicule']);
 
-    if (vin.isNotEmpty && number.isNotEmpty && vehicle.isNotEmpty) {
-      isTitleValid.value = true;
-      titleError.value = '';
-    } else {
-      isTitleValid.value = false;
-      titleError.value = 'Titre invalide ou incomplet.';
-    }
+    isTitleValid.value = vin.isNotEmpty && number.isNotEmpty && vehicle.isNotEmpty;
+    titleError.value = isTitleValid.value ? '' : 'Titre invalide ou incomplet.';
   }
 
   Future<void> _validateReceipt(String path) async {
     final data = await _ocrService.processImage(path, scanType: 'receipt');
-    final receiptNo = _extractValue(data, ['ReceiptNumber', 'receipt no']);
-    final date = _extractValue(data, ['Issue Date', 'issue_date']);
+    final receiptNo = _extractValue(data, ['ReceiptNumber', 'receipt no', 'Receipt No', 'receiptnumber']);
+    final date = _extractValue(data, ['Issue Date', 'issue_date', 'issuedate']);
 
-    if (receiptNo.isNotEmpty && date.isNotEmpty) {
-      isReceiptValid.value = true;
-      receiptError.value = '';
-    } else {
-      isReceiptValid.value = false;
-      receiptError.value = 'Reçu invalide ou illisible.';
-    }
+    isReceiptValid.value = receiptNo.isNotEmpty && date.isNotEmpty;
+    receiptError.value = isReceiptValid.value ? '' : 'Reçu invalide ou illisible.';
   }
 
   void _handleOcrError(String type, String message) {
+    final error = 'Erreur OCR : $message';
     if (type == 'license') {
-      licenseError.value = 'Erreur OCR : $message';
+      licenseError.value = error;
       isLicenseValid.value = false;
     } else if (type == 'title') {
-      titleError.value = 'Erreur OCR : $message';
+      titleError.value = error;
       isTitleValid.value = false;
     } else if (type == 'receipt') {
-      receiptError.value = 'Erreur OCR : $message';
+      receiptError.value = error;
       isReceiptValid.value = false;
     }
   }
@@ -183,12 +172,90 @@ class UploadDocumentsController extends GetxController {
     }
   }
 
-  Future<void> goToPayment() async {
+  Future<void> _createAppointmentAndHandle({required bool goToPayment}) async {
     if (!isReadyForPayment) {
       CustomToast.showError(Get.context!, "Veuillez valider le permis ET le titre.");
       return;
     }
-    Get.toNamed(Routes.PAYMENT);
+
+    isLoading.value = true;
+
+    try {
+      final token = await SecureStorageService.readToken();
+      final userId = await SecureStorageService.readUserId();
+
+      if (userId == null || token == null) {
+        CustomToast.showError(Get.context!, "Utilisateur introuvable.");
+        return;
+      }
+
+      final titleData = await _ocrService.processImage(titleFile.value!.path, scanType: 'title');
+      final vin = _extractValue(titleData, ['VIN', 'vin']);
+      final titleNumber = _extractValue(titleData, ['TitleNumber', 'Title Number', 'numero_de_titre', 'numerodetitre', 'numéro de titre']);
+      final vehicleType = _extractValue(titleData, ['VehicleType', 'type_de_vehicule', 'typedevehicule', 'type de véhicule']);
+
+      String? receiptNumber;
+      String? issueDate;
+
+      if (receiptFile.value != null) {
+        final receiptData = await _ocrService.processImage(receiptFile.value!.path, scanType: 'receipt');
+        receiptNumber = _extractValue(receiptData, ['ReceiptNumber', 'receipt no', 'Receipt No', 'receiptnumber']);
+        final rawDate = _extractValue(receiptData, ['Issue Date', 'issue_date', 'issuedate']);
+        issueDate = _normalizeDate(rawDate);
+      }
+
+      final request = AppointmentRequest(
+        userId: userId,
+        vin: vin,
+        vehicleType: vehicleType,
+        titleNumber: titleNumber,
+        receiptNumber: receiptNumber,
+        issuesDate: issueDate,
+      );
+
+      print("📤 Données envoyées à l'API : ${request.toJson()}");
+
+      final result = await AppointmentService().createAppointment(request: request, token: token);
+
+      if (result['statusCode'] == 201 && result['data'] != null) {
+        if (goToPayment) {
+          CustomToast.showSuccess(Get.context!, "Rendez-vous créé. Redirection...");
+          Get.toNamed(Routes.PAYMENT);
+        } else {
+          CustomToast.showSuccess(Get.context!, "Rendez-vous enregistré. Vous pouvez ajouter un autre véhicule.");
+          _resetForm();
+        }
+      } else {
+        final errorMessage = result['message'] ?? 'Erreur lors de la création du rendez-vous.';
+        CustomToast.showError(Get.context!, errorMessage);
+      }
+    } catch (e) {
+      CustomToast.showError(Get.context!, "Erreur: ${e.toString()}");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> goToPayment() async {
+    await _createAppointmentAndHandle(goToPayment: true);
+  }
+
+  Future<void> saveAppointmentOnly() async {
+    await _createAppointmentAndHandle(goToPayment: false);
+  }
+
+  void _resetForm() {
+    licenseFile.value = null;
+    titleFile.value = null;
+    receiptFile.value = null;
+
+    isLicenseValid.value = false;
+    isTitleValid.value = false;
+    isReceiptValid.value = false;
+
+    licenseError.value = '';
+    titleError.value = '';
+    receiptError.value = '';
   }
 
   String _extractValue(Map<String, dynamic> data, List<String> possibleKeys) {
@@ -207,6 +274,11 @@ class UploadDocumentsController extends GetxController {
 
   String _normalize(String input) {
     return input
+        .replaceAll('Ã©', 'e')
+        .replaceAll('Ã¨', 'e')
+        .replaceAll('Ãª', 'e')
+        .replaceAll('Ã´', 'o')
+        .replaceAll('Ã', 'a')
         .toLowerCase()
         .replaceAllMapped(RegExp(r'[àâä]'), (_) => 'a')
         .replaceAllMapped(RegExp(r'[éèêë]'), (_) => 'e')
@@ -214,7 +286,21 @@ class UploadDocumentsController extends GetxController {
         .replaceAllMapped(RegExp(r'[ôö]'), (_) => 'o')
         .replaceAllMapped(RegExp(r'[ùûü]'), (_) => 'u')
         .replaceAll('ç', 'c')
-        .replaceAll(' ', '')
+        .replaceAll(RegExp(r'\s+'), '')
         .trim();
+  }
+
+  String? _normalizeDate(String? input) {
+    if (input == null || input.isEmpty) return null;
+    try {
+      final parts = input.split('/');
+      if (parts.length == 3) {
+        final day = parts[0].padLeft(2, '0');
+        final month = parts[1].padLeft(2, '0');
+        final year = parts[2];
+        return "$year-$month-$day"; // Format ISO
+      }
+    } catch (_) {}
+    return input; // fallback
   }
 }
