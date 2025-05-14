@@ -5,6 +5,8 @@ import 'package:salvage_app/app/theme/app_theme.dart';
 import 'package:salvage_app/app/widgets/custom_button.dart';
 import 'package:salvage_app/app/widgets/payment_card.dart';
 
+import '../../../routes/app_pages.dart';
+
 class PaymentView extends GetView<PaymentController> {
   const PaymentView({super.key});
 
@@ -69,11 +71,12 @@ class PaymentView extends GetView<PaymentController> {
               CustomButton(
                 text: "Pay Now",
                 onTap: () {
-                  // Action de paiement ici
+                  Get.toNamed(Routes.CONFIRM_PAYMENT); // 👈 Redirection ici
                 },
                 backgroundColor: AppColors.primary,
                 textColor: AppColors.white,
               ),
+
             ],
           ),
         );

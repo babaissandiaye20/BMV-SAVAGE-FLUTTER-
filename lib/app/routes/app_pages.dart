@@ -13,6 +13,7 @@ import '../modules/login/otp/bindings/otp_binding.dart';
 import '../modules/login/otp/views/otp_view.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/payment/bindings/payment_binding.dart';
+import '../modules/payment/views/confirm_payment_view.dart';
 import '../modules/payment/views/payment_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
@@ -94,6 +95,11 @@ class AppPages {
       page: () => const UploadDocumentsView(),
       binding: UploadDocumentsBinding(),
     ),
+    GetPage(
+      name: _Paths.CONFIRM_PAYMENT,
+      page: () => const ConfirmPaymentView(),
+    ),
+
 
   ];
 }

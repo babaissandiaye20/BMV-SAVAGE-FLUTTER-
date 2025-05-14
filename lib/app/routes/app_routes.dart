@@ -15,6 +15,8 @@ abstract class Routes {
   static const PAYMENT = _Paths.PAYMENT;
   static const RECEIPT_INFO = _Paths.RECEIPT_INFO; // 👈 Ajouté ici
   static const LANDING = _Paths.LANDING;
+  static const CONFIRM_PAYMENT = _Paths.CONFIRM_PAYMENT;
+
 }
 
 abstract class _Paths {
@@ -32,4 +34,6 @@ abstract class _Paths {
   static const PAYMENT = '/payment';
   static const RECEIPT_INFO = '/receipt-info'; // 👈 Ajouté ici
   static const LANDING = '/landing';
+  static const CONFIRM_PAYMENT = '/confirm-payment';
+
 }

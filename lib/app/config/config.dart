@@ -1,6 +1,6 @@
 class Config {
   // Base URLs for different environments
-  static const String _apiUrlDev = "http://192.168.1.25:3000"; // Development
+  static const String _apiUrlDev = "http://192.168.1.19:3000"; // Development
   static const String _apiUrlProd = "https://votre-api-production.com"; // Production
 
   // Stripe Publishable Keys
@@ -15,7 +15,7 @@ class Config {
   static const String uploadEndpoint = "/upload";
   static const String appointmentEndpoint = "/appointments";
   // openai api key
-  static const String openRouterApiKey = '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';
+  static const String openRouterApiKey = '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';
 
   // Example API key
   static const String apiKey = "votre_clé_api_ici";
