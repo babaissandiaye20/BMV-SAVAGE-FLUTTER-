@@ -7,6 +7,7 @@ import 'package:salvage_app/app/services/document_service.dart';
 import 'package:salvage_app/app/services/ocr_service.dart';
 import 'package:salvage_app/app/services/appointment_service.dart';
 import 'package:salvage_app/app/widgets/custom_toast.dart';
+import 'package:diacritic/diacritic.dart';
 import '../../../models/appointment_response.dart';
 import '../../../routes/app_pages.dart';
 import '../../../services/secure_storage_service.dart';
@@ -19,6 +20,10 @@ class UploadDocumentsController extends GetxController {
   final Rxn<XFile> licenseFile = Rxn<XFile>();
   final Rxn<XFile> titleFile = Rxn<XFile>();
   final Rxn<XFile> receiptFile = Rxn<XFile>();
+
+  final RxMap<String, dynamic> licenseData = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> titleData = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> receiptData = <String, dynamic>{}.obs;
 
   final RxBool isLicenseValid = false.obs;
   final RxBool isTitleValid = false.obs;
@@ -43,6 +48,7 @@ class UploadDocumentsController extends GetxController {
   }
 
   Future<void> _loadExistingLicense() async {
+    isLicenseLoading.value = true;
     try {
       final docs = await _service.getDocuments();
       final licenseDoc = docs.firstWhereOrNull((d) => d.type.name.toUpperCase() == 'LICENSE');
@@ -57,6 +63,8 @@ class UploadDocumentsController extends GetxController {
       }
     } catch (e) {
       licenseError.value = 'Erreur lors du chargement du permis : ${e.toString()}';
+    } finally {
+      isLicenseLoading.value = false;
     }
   }
 
@@ -81,10 +89,13 @@ class UploadDocumentsController extends GetxController {
       return;
     }
 
-    final picked = await picker.pickImage(source: source, imageQuality: 80);
-    if (picked == null) return;
-
     _setLoading(type, true);
+
+    final picked = await picker.pickImage(source: source, imageQuality: 80);
+    if (picked == null) {
+      _setLoading(type, false);
+      return;
+    }
 
     try {
       if (type == 'license') {
@@ -106,6 +117,8 @@ class UploadDocumentsController extends GetxController {
 
   Future<void> _validateLicense(String path) async {
     final data = await _ocrService.processImage(path, scanType: 'license');
+    licenseData.assignAll(data);
+
     final name = _extractValue(data, ['nom']);
     final number = _extractValue(data, ['numéro du permis', 'license_number', 'permit_number', 'DL', 'DLN']);
 
@@ -115,9 +128,11 @@ class UploadDocumentsController extends GetxController {
 
   Future<void> _validateTitle(String path) async {
     final data = await _ocrService.processImage(path, scanType: 'title');
+    titleData.assignAll(data);
+
     final vin = _extractValue(data, ['VIN', 'vin']);
-    final number = _extractValue(data, ['TitleNumber', 'Title Number', 'numero_de_titre', 'numerodetitre', 'numéro de titre']);
-    final vehicle = _extractValue(data, ['VehicleType', 'type_de_vehicule', 'typedevehicule', 'type de véhicule']);
+    final number = _extractValue(data, ['TitleNumber', 'Title Number', 'numero_de_titre']);
+    final vehicle = _extractValue(data, ['VehicleType', 'type_de_vehicule']);
 
     isTitleValid.value = vin.isNotEmpty && number.isNotEmpty && vehicle.isNotEmpty;
     titleError.value = isTitleValid.value ? '' : 'Titre invalide ou incomplet.';
@@ -125,8 +140,10 @@ class UploadDocumentsController extends GetxController {
 
   Future<void> _validateReceipt(String path) async {
     final data = await _ocrService.processImage(path, scanType: 'receipt');
-    final receiptNo = _extractValue(data, ['ReceiptNumber', 'receipt no', 'Receipt No', 'receiptnumber']);
-    final date = _extractValue(data, ['Issue Date', 'issue_date', 'issuedate']);
+    receiptData.assignAll(data);
+
+    final receiptNo = _extractValue(data, ['ReceiptNumber', 'receipt no']);
+    final date = _extractValue(data, ['Issue Date', 'issue_date']);
 
     isReceiptValid.value = receiptNo.isNotEmpty && date.isNotEmpty;
     receiptError.value = isReceiptValid.value ? '' : 'Reçu invalide ou illisible.';
@@ -159,14 +176,17 @@ class UploadDocumentsController extends GetxController {
   void clearDocument(String type) {
     if (type == 'license') {
       licenseFile.value = null;
+      licenseData.clear();
       isLicenseValid.value = false;
       licenseError.value = '';
     } else if (type == 'title') {
       titleFile.value = null;
+      titleData.clear();
       isTitleValid.value = false;
       titleError.value = '';
     } else if (type == 'receipt') {
       receiptFile.value = null;
+      receiptData.clear();
       isReceiptValid.value = false;
       receiptError.value = '';
     }
@@ -189,18 +209,16 @@ class UploadDocumentsController extends GetxController {
         return;
       }
 
-      final titleData = await _ocrService.processImage(titleFile.value!.path, scanType: 'title');
       final vin = _extractValue(titleData, ['VIN', 'vin']);
-      final titleNumber = _extractValue(titleData, ['TitleNumber', 'Title Number', 'numero_de_titre', 'numerodetitre', 'numéro de titre']);
-      final vehicleType = _extractValue(titleData, ['VehicleType', 'type_de_vehicule', 'typedevehicule', 'type de véhicule']);
+      final titleNumber = _extractValue(titleData, ['TitleNumber', 'numero_de_titre']);
+      final vehicleType = _extractValue(titleData, ['VehicleType', 'type_de_vehicule']);
 
       String? receiptNumber;
       String? issueDate;
 
       if (receiptFile.value != null) {
-        final receiptData = await _ocrService.processImage(receiptFile.value!.path, scanType: 'receipt');
-        receiptNumber = _extractValue(receiptData, ['ReceiptNumber', 'receipt no', 'Receipt No', 'receiptnumber']);
-        final rawDate = _extractValue(receiptData, ['Issue Date', 'issue_date', 'issuedate']);
+        receiptNumber = _extractValue(receiptData, ['ReceiptNumber', 'receipt no']);
+        final rawDate = _extractValue(receiptData, ['Issue Date', 'issue_date']);
         issueDate = _normalizeDate(rawDate);
       }
 
@@ -212,8 +230,6 @@ class UploadDocumentsController extends GetxController {
         receiptNumber: receiptNumber,
         issuesDate: issueDate,
       );
-
-      print("📤 Données envoyées à l'API : ${request.toJson()}");
 
       final result = await AppointmentService().createAppointment(request: request, token: token);
 
@@ -245,15 +261,18 @@ class UploadDocumentsController extends GetxController {
   }
 
   void _resetForm() {
-    licenseFile.value = null;
+
     titleFile.value = null;
     receiptFile.value = null;
 
-    isLicenseValid.value = false;
+
+    titleData.clear();
+    receiptData.clear();
+
+
     isTitleValid.value = false;
     isReceiptValid.value = false;
 
-    licenseError.value = '';
     titleError.value = '';
     receiptError.value = '';
   }
@@ -273,19 +292,8 @@ class UploadDocumentsController extends GetxController {
   }
 
   String _normalize(String input) {
-    return input
-        .replaceAll('Ã©', 'e')
-        .replaceAll('Ã¨', 'e')
-        .replaceAll('Ãª', 'e')
-        .replaceAll('Ã´', 'o')
-        .replaceAll('Ã', 'a')
+    return removeDiacritics(input)
         .toLowerCase()
-        .replaceAllMapped(RegExp(r'[àâä]'), (_) => 'a')
-        .replaceAllMapped(RegExp(r'[éèêë]'), (_) => 'e')
-        .replaceAllMapped(RegExp(r'[îï]'), (_) => 'i')
-        .replaceAllMapped(RegExp(r'[ôö]'), (_) => 'o')
-        .replaceAllMapped(RegExp(r'[ùûü]'), (_) => 'u')
-        .replaceAll('ç', 'c')
         .replaceAll(RegExp(r'\s+'), '')
         .trim();
   }
@@ -298,9 +306,9 @@ class UploadDocumentsController extends GetxController {
         final day = parts[0].padLeft(2, '0');
         final month = parts[1].padLeft(2, '0');
         final year = parts[2];
-        return "$year-$month-$day"; // Format ISO
+        return "$year-$month-$day";
       }
     } catch (_) {}
-    return input; // fallback
+    return input;
   }
 }

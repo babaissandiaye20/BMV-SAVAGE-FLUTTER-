@@ -51,11 +51,11 @@ class AppPages {
         ),
       ],
     ),
- /*   GetPage(
+   GetPage(
       name: _Paths.CHAT,
       page: () => const ChatView(),
-      binding: ChatBinding(),gv
-    ),*/
+      binding: ChatBinding(),
+    ),
     GetPage(
       name: _Paths.PROFILE,
       page: () => const ProfilePage(),

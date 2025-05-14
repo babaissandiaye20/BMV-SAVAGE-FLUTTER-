@@ -22,9 +22,9 @@ dependencies:
   permission_handler: ^11.0.1
   flutter_secure_storage: ^9.2.4
   flutter_stripe: ^9.5.0
+  diacritic: ^0.1.5
   url_launcher: ^6.1.7
 
-  #device_apps: ^2.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

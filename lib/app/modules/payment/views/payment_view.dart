@@ -68,14 +68,15 @@ class PaymentView extends GetView<PaymentController> {
                 ),
               )),
               const SizedBox(height: 24),
-              CustomButton(
-                text: "Pay Now",
-                onTap: () {
-                  Get.toNamed(Routes.CONFIRM_PAYMENT); // 👈 Redirection ici
-                },
-                backgroundColor: AppColors.primary,
-                textColor: AppColors.white,
-              ),
+        CustomButton(
+        text: "Pay Now",
+        onTap: () {
+        Get.toNamed(Routes.CONFIRM_PAYMENT, arguments: controller.totalAmount.value);
+        },
+        backgroundColor: AppColors.primary,
+        textColor: AppColors.white,
+        ),
+        
 
             ],
           ),

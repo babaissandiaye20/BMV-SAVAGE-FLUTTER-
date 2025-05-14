@@ -1,8 +1,5 @@
-/*
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:salvage_app/app/theme/app_theme.dart';
 import '../controllers/chat_controller.dart';
 
 class ChatView extends GetView<ChatController> {
@@ -10,83 +7,126 @@ class ChatView extends GetView<ChatController> {
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController textController = TextEditingController();
+
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Support - Chat'),
-        backgroundColor: AppColors.primary,
+        title: const Text('💬 Chat Support'),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          onPressed: () => Get.offAllNamed('/home'),
+          tooltip: 'Retour à l’accueil 🏠',
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.phone),
+            onPressed: () => Get.snackbar("📞 Support", "Calling support... (soon 😉)",
+                snackPosition: SnackPosition.TOP,
+                backgroundColor: Colors.black,
+                colorText: Colors.white),
+          )
+        ],
       ),
-      backgroundColor: AppColors.background,
       body: Column(
         children: [
           Expanded(
-            child: Obx(() {
-              return ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: controller.messages.length,
-                itemBuilder: (context, index) {
-                  final msg = controller.messages[index];
-                  final isUser = msg.isUser;
-                  return Align(
-                    alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 6),
-                      padding: const EdgeInsets.all(12),
-                      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
-                      decoration: BoxDecoration(
-                        color: isUser ? AppColors.primary : AppColors.secondary,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        msg.text,
-                        style: TextStyle(
-                          color: isUser ? Colors.white : Colors.black,
+            child: Obx(() => ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              itemCount: controller.messages.length,
+              itemBuilder: (context, index) {
+                final msg = controller.messages[index];
+                return Align(
+                  alignment: msg.fromUser ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Column(
+                    crossAxisAlignment: msg.fromUser
+                        ? CrossAxisAlignment.end
+                        : CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: msg.audio
+                              ? Colors.grey[300]
+                              : msg.fromUser
+                              ? Colors.black
+                              : Colors.grey[300],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: msg.audio
+                            ? const Icon(Icons.mic, color: Colors.black54)
+                            : Text(
+                          msg.text ?? '',
+                          style: TextStyle(
+                            color: msg.fromUser ? Colors.white : Colors.black,
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
-              );
-            }),
-          ),
-          const Divider(height: 1),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            color: AppColors.white,
-            child: Row(
-              children: [
-                // Nouveau bouton vocal
-                IconButton(
-                  icon: const Icon(Icons.mic, color: AppColors.primary),
-                  onPressed: () {
-                    // TODO: implémenter enregistrement vocal ou STT
-                    Get.snackbar("Info", "Fonction vocale non encore activée.");
-                  },
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: controller.textController,
-                    decoration: InputDecoration(
-                      hintText: 'Écrivez votre message...',
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.inputBorder),
-                        borderRadius: BorderRadius.circular(24),
+                      Text(
+                        msg.time,
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    ),
+                      const SizedBox(height: 8),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.send, color: AppColors.primary),
-                  onPressed: controller.sendMessage,
-                ),
-              ],
-            ),
+                );
+              },
+            )),
           ),
+          _buildInputBar(textController),
         ],
       ),
     );
   }
-}
 
-*/
+  Widget _buildInputBar(TextEditingController controllerText) {
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: Colors.grey)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: controllerText,
+                decoration: InputDecoration(
+                  hintText: 'Type a message...',
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                  fillColor: Colors.grey[200],
+                  filled: true,
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.send),
+              onPressed: () {
+                final text = controllerText.text.trim();
+                if (text.isNotEmpty) {
+                  controller.sendText(text);
+                  controllerText.clear();
+                }
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.mic),
+              onPressed: () {
+                controller.sendAudio();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

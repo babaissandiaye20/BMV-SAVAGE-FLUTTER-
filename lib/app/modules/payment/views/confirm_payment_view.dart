@@ -8,6 +8,8 @@ class ConfirmPaymentView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double total = Get.arguments ?? 0.0; // 👈 récupère le total
+
     final TextEditingController cardNumberController = TextEditingController();
     final TextEditingController expiryController = TextEditingController();
     final TextEditingController cvvController = TextEditingController();
@@ -22,13 +24,14 @@ class ConfirmPaymentView extends StatelessWidget {
         title: const Text("Payment Method", style: TextStyle(color: AppColors.text)),
         centerTitle: true,
       ),
-      body: SingleChildScrollView( // Ajout de SingleChildScrollView
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             Image.asset("assets/images/logo-payement.png", height: 100),
             const SizedBox(height: 16),
-            const Text("Total: \$150.00", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            Text("Total: \$${total.toStringAsFixed(2)}", // 👈 affichage réel
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             const Text("Choose your preferred method", style: TextStyle(fontSize: 14)),
 
@@ -94,7 +97,7 @@ class ConfirmPaymentView extends StatelessWidget {
               text: "Pay with Stripe",
               backgroundColor: Colors.red,
               onTap: () {
-                Get.snackbar("Succès", "Paiement effectué !");
+                Get.snackbar("Succès", "Paiement de \$${total.toStringAsFixed(2)} effectué !");
                 Get.back();
               },
               textColor: Colors.white,
