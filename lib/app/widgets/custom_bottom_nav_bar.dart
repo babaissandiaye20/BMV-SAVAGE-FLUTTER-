@@ -36,7 +36,7 @@ class CustomBottomNavBar extends StatelessWidget {
                   Get.offAllNamed(Routes.HOME);
                   break;
                 case 1:
-                // Action à définir pour "Rendez-vous"
+                  Get.toNamed(Routes.APPOINTMENT);
                   break;
                 case 2:
                   Get.toNamed(Routes.CHAT);
@@ -44,6 +44,7 @@ class CustomBottomNavBar extends StatelessWidget {
                 case 3:
                   Get.toNamed(Routes.PROFILE);
                   break;
+
               }
             },
             child: Column(

@@ -1,5 +1,9 @@
 import 'package:get/get.dart';
 
+import '../modules/about/bindings/about_binding.dart';
+import '../modules/about/views/about_view.dart';
+import '../modules/appointment/bindings/appointment_binding.dart';
+import '../modules/appointment/views/appointment_view.dart';
 import '../modules/chat/bindings/chat_binding.dart';
 import '../modules/chat/views/chat_view.dart';
 import '../modules/create_appointment/bindings/create_appointment_binding.dart';
@@ -51,7 +55,7 @@ class AppPages {
         ),
       ],
     ),
-   GetPage(
+    GetPage(
       name: _Paths.CHAT,
       page: () => const ChatView(),
       binding: ChatBinding(),
@@ -99,7 +103,15 @@ class AppPages {
       name: _Paths.CONFIRM_PAYMENT,
       page: () => const ConfirmPaymentView(),
     ),
-
-
+    GetPage(
+      name: _Paths.APPOINTMENT,
+      page: () => const AppointmentView(),
+      binding: AppointmentBinding(),
+    ),
+    GetPage(
+      name: _Paths.ABOUT,
+      page: () => const AboutView(),
+      binding: AboutBinding(),
+    ),
   ];
 }

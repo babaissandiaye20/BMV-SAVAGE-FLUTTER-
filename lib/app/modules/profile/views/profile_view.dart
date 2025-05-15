@@ -51,7 +51,10 @@ class ProfilePage extends StatelessWidget {
             _buildMenuItem(Icons.person, 'Personal Details', onTap: () {
               // Get.toNamed(Routes.PERSONAL_DETAILS);
             }),
-            _buildMenuItem(Icons.history, 'About', onTap: () {}),
+            _buildMenuItem(Icons.history, 'About', onTap: () {
+              Get.toNamed(Routes.ABOUT);
+            }),
+
             _buildMenuItem(Icons.help_outline, 'Help', onTap: () {}),
             _buildMenuItem(Icons.info_outline, 'Log out', onTap: () {
               showDialog(
