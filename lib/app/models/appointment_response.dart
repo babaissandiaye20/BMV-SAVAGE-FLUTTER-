@@ -1,4 +1,5 @@
 class AppointmentRequest {
+  final String id;
   final String userId;
   final String vin;
   final String vehicleType;
@@ -8,9 +9,10 @@ class AppointmentRequest {
   final String? scheduledAt;
   final String? location;
 
-  double? price; // 👈 utilisé localement
+  double? price;
 
   AppointmentRequest({
+    required this.id,
     required this.userId,
     required this.vin,
     required this.vehicleType,
@@ -24,19 +26,21 @@ class AppointmentRequest {
 
   Map<String, dynamic> toJson() {
     return {
+      if (id.isNotEmpty) "id": id,
       "userId": userId,
       "vin": vin,
       "vehicleType": vehicleType,
       "titleNumber": titleNumber,
-      if (receiptNumber != null && receiptNumber!.isNotEmpty) "receiptNumber": receiptNumber,
-      if (issuesDate != null && issuesDate!.isNotEmpty) "issuesDate": issuesDate,
-      if (scheduledAt != null && scheduledAt!.isNotEmpty) "scheduledAt": scheduledAt,
-      if (location != null && location!.isNotEmpty) "location": location,
+      if (receiptNumber?.isNotEmpty ?? false) "receiptNumber": receiptNumber,
+      if (issuesDate?.isNotEmpty ?? false) "issuesDate": issuesDate,
+      if (scheduledAt?.isNotEmpty ?? false) "scheduledAt": scheduledAt,
+      if (location?.isNotEmpty ?? false) "location": location,
     };
   }
 
   factory AppointmentRequest.fromJson(Map<String, dynamic> json) {
     return AppointmentRequest(
+      id: json['id'] ?? '',
       userId: json['userId'],
       vin: json['vin'],
       vehicleType: json['vehicleType'],
@@ -45,7 +49,22 @@ class AppointmentRequest {
       issuesDate: json['issuesDate'],
       scheduledAt: json['scheduledAt'],
       location: json['location'],
-      price: json['price']?.toDouble(), // pris en compte localement
+      price: (json['price'] != null) ? (json['price'] as num).toDouble() : null,
+    );
+  }
+
+  /// Factory sans ID — pour création côté client sans valeur `id`
+  factory AppointmentRequest.fromPartialJson(Map<String, dynamic> json) {
+    return AppointmentRequest(
+      id: '', // ID vide, généré ou géré par backend
+      userId: json['userId'],
+      vin: json['vin'],
+      vehicleType: json['vehicleType'],
+      titleNumber: json['titleNumber'],
+      receiptNumber: json['receiptNumber'],
+      issuesDate: json['issuesDate'],
+      scheduledAt: json['scheduledAt'],
+      location: json['location'],
     );
   }
 

@@ -1,3 +1,4 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:salvage_app/app/services/appointment_service.dart';
@@ -151,3 +152,4 @@ class CreateAppointmentController extends GetxController {
     return '';
   }
 }
+*/

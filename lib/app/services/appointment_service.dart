@@ -35,5 +35,16 @@ class AppointmentService {
       token: token,
     );
   }
+  Future<Map<String, dynamic>> cancelAppointment({
+    required String appointmentId,
+    required String token,
+  }) async {
+    return await _apiService.putRequest(
+      '/appointment/$appointmentId/cancel',
+      {}, // pas de body requis
+      token: token,
+    );
+  }
+
 
 }

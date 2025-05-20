@@ -28,6 +28,29 @@ class ApiService extends GetxService {
       throw Exception('Erreur de connexion: $e');
     }
   }
+// PUT
+  Future<Map<String, dynamic>> putRequest(
+      String endpoint,
+      dynamic body, {
+        String? token,
+      }) async {
+    try {
+      final headers = {
+        "Content-Type": "application/json",
+        if (token != null) "Authorization": "Bearer $token",
+      };
+
+      final response = await http.put(
+        Uri.parse("${Config.getApiUrl()}$endpoint"),
+        headers: headers,
+        body: json.encode(body),
+      );
+
+      return _handleResponse(response);
+    } catch (e) {
+      throw Exception('Erreur PUT: $e');
+    }
+  }
 
   // Multipart POST
   Future<Map<String, dynamic>> postMultipartRequest({

@@ -1,43 +1,40 @@
-enum PaymentStatus {
-  INITIATED,
-  PAID,
-  FAILED,
-}
-
-class Payment {
-  final String id;
+class PaymentRequestResponse {
   final String userId;
-  final String appointmentId;
+  final List<String> appointmentIds;
   final String paymentModeId;
-  final PaymentStatus status;
-  final String transactionId;
-  final double amount;
-  final DateTime createdAt;
-  final DateTime? deletedAt;
+  final List<double> amounts;
+  final String currency;
+  final String? checkoutUrl;
 
-  Payment({
-    required this.id,
+  PaymentRequestResponse({
     required this.userId,
-    required this.appointmentId,
+    required this.appointmentIds,
     required this.paymentModeId,
-    required this.status,
-    required this.transactionId,
-    required this.amount,
-    required this.createdAt,
-    this.deletedAt,
+    required this.amounts,
+    required this.currency,
+    this.checkoutUrl,
   });
 
-  factory Payment.fromJson(Map<String, dynamic> json) {
-    return Payment(
-      id: json['id'],
-      userId: json['userId'],
-      appointmentId: json['appointmentId'],
-      paymentModeId: json['paymentModeId'],
-      status: PaymentStatus.values.firstWhere((e) => e.toString() == 'PaymentStatus.${json['status']}'),
-      transactionId: json['transactionId'],
-      amount: json['amount'].toDouble(),
-      createdAt: DateTime.parse(json['createdAt']),
-      deletedAt: json['deletedAt'] != null ? DateTime.parse(json['deletedAt']) : null,
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'appointmentIds': appointmentIds,
+      'paymentModeId': paymentModeId,
+      'amounts': amounts,
+      'currency': currency,
+    };
+  }
+
+  factory PaymentRequestResponse.fromJson(Map<String, dynamic> json) {
+    return PaymentRequestResponse(
+      userId: json['userId'] ?? '',
+      appointmentIds: List<String>.from(json['appointmentIds'] ?? []),
+      paymentModeId: json['paymentModeId'] ?? '',
+      amounts: List<double>.from(
+        (json['amounts'] ?? []).map((e) => e.toDouble()),
+      ),
+      currency: json['currency'] ?? '',
+      checkoutUrl: json['checkoutUrl'],
     );
   }
 }

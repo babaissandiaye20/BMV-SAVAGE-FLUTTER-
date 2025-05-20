@@ -6,6 +6,7 @@ import 'package:salvage_app/app/widgets/custom_button.dart';
 import 'package:salvage_app/app/widgets/payment_card.dart';
 
 import '../../../routes/app_pages.dart';
+import '../../../widgets/custom_toast.dart';
 
 class PaymentView extends GetView<PaymentController> {
   const PaymentView({super.key});
@@ -47,14 +48,27 @@ class PaymentView extends GetView<PaymentController> {
                     final hasReceipt = appt.receiptNumber != null && appt.receiptNumber!.isNotEmpty;
                     final price = appt.price ?? 0;
 
-                    return PaymentCard(
-                      vehicleTitle: "Vehicle ${index + 1}",
-                      items: [
-                        "Car Title",
-                        hasReceipt ? "Receipt" : "No receipt provided.",
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: PaymentCard(
+                            vehicleTitle: "Vehicle ${index + 1}",
+                            items: [
+                              "Car Title",
+                              hasReceipt ? "Receipt" : "No receipt provided.",
+                            ],
+                            fee: "\$${price.toStringAsFixed(2)}",
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => controller.deleteAppointment(appt.id),
+                        ),
                       ],
-                      fee: "\$${price.toStringAsFixed(2)}",
                     );
+
+
                   },
                 ),
               ),
@@ -68,15 +82,20 @@ class PaymentView extends GetView<PaymentController> {
                 ),
               )),
               const SizedBox(height: 24),
-        CustomButton(
-        text: "Pay Now",
-        onTap: () {
-        Get.toNamed(Routes.CONFIRM_PAYMENT, arguments: controller.totalAmount.value);
-        },
-        backgroundColor: AppColors.primary,
-        textColor: AppColors.white,
-        ),
-        
+              CustomButton(
+                text: "Pay Now",
+                onTap: () {
+                  if (controller.appointments.length > 20) {
+                    CustomToast.showError(context, "Vous ne pouvez pas avoir plus de 20 rendez-vous non payés. Veuillez en supprimer.");
+                    return;
+                  }
+                  Get.toNamed(Routes.CONFIRM_PAYMENT, arguments: controller.totalAmount.value);
+                },
+                backgroundColor: AppColors.primary,
+                textColor: AppColors.white,
+              )
+
+
 
             ],
           ),

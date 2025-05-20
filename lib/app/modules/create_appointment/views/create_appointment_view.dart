@@ -1,3 +1,4 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:salvage_app/app/modules/create_appointment/controllers/create_appointment_controller.dart';
@@ -85,3 +86,4 @@ class CreateAppointmentView extends GetView<CreateAppointmentController> {
     );
   }
 }
+*/

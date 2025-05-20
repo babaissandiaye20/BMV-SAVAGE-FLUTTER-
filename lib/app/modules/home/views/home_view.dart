@@ -14,33 +14,6 @@ class HomeView extends StatelessWidget {
   final controller = Get.put(HomeController());
   String? selectedOption;
 
-  void _showPreAppointmentModal(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => CustomConfirmationModal(
-        title: "Avant de continuer",
-        description: "Est-ce un rendez-vous pour vous-même ?",
-        radioOptions: ["Oui, c'est pour moi", "Non, pour quelqu’un d’autre"],
-        selectedOption: selectedOption,
-        onRadioChanged: (value) {
-          selectedOption = value;
-          Navigator.pop(context);
-          _showPreAppointmentModal(context);
-        },
-        onConfirm: () {
-          if (selectedOption != null) {
-            Navigator.pop(context);
-            Get.toNamed(Routes.CREATE_APPOINTMENT);
-          } else {
-            CustomToast.showError(context, "Veuillez sélectionner une option.");
-          }
-        },
-        onCancel: () {
-          Navigator.pop(context);
-        },
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +56,7 @@ class HomeView extends StatelessWidget {
               title: 'View Appointment',
               subtitle: "Check the details of your appointment",
               imagePath: 'assets/images/event_available.png',
-              onTap: () => _showPreAppointmentModal(context),
+              onTap: () => Get.toNamed(Routes.APPOINTMENT),
             ),
             HomeCard(
               title: 'Chat with Support',

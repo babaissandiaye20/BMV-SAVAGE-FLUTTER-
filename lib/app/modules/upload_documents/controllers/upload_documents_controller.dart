@@ -11,12 +11,13 @@ import 'package:diacritic/diacritic.dart';
 import '../../../models/appointment_response.dart';
 import '../../../routes/app_pages.dart';
 import '../../../services/secure_storage_service.dart';
+import 'package:uuid/uuid.dart';
 
 class UploadDocumentsController extends GetxController {
   final picker = ImagePicker();
   final DocumentService _service = DocumentService();
   final OcrService _ocrService = OcrService();
-
+  final uuid = Uuid();
   final Rxn<XFile> licenseFile = Rxn<XFile>();
   final Rxn<XFile> titleFile = Rxn<XFile>();
   final Rxn<XFile> receiptFile = Rxn<XFile>();
@@ -223,6 +224,7 @@ class UploadDocumentsController extends GetxController {
       }
 
       final request = AppointmentRequest(
+       id: uuid.v4(),
         userId: userId,
         vin: vin,
         vehicleType: vehicleType,

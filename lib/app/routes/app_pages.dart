@@ -75,20 +75,20 @@ class AppPages {
       page: () => const CompleteProfileView(),
       binding: RegisterCompleteProfileBinding(),
     ),
-    GetPage(
+   /* GetPage(
       name: _Paths.CREATE_APPOINTMENT,
       page: () => const CreateAppointmentView(),
       binding: CreateAppointmentBinding(),
-    ),
+    ),*/
     GetPage(
       name: _Paths.PAYMENT,
       page: () => const PaymentView(),
       binding: PaymentBinding(),
     ),
-    GetPage(
+   /* GetPage(
       name: _Paths.RECEIPT_INFO,
       page: () => ReceiptInfoView(), // 👈 Sans binding
-    ),
+    ),*/
     GetPage(
       name: _Paths.LANDING,
       page: () => LandingView(),

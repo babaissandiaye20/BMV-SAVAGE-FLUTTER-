@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../models/appointment_response.dart';
@@ -163,3 +164,4 @@ class AppointmentView extends GetView<AppointmentController> {
     return "$weekday, $month ${date.day}, ${date.year} at $hour:$minute";
   }
 }
+

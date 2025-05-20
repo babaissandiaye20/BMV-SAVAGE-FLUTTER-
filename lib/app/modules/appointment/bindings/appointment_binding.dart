@@ -1,3 +1,4 @@
+
 import 'package:get/get.dart';
 
 import '../controllers/appointment_controller.dart';
@@ -10,3 +11,4 @@ class AppointmentBinding extends Bindings {
     );
   }
 }
+

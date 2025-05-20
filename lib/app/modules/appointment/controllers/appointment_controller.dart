@@ -1,3 +1,4 @@
+
 import 'package:get/get.dart';
 
 import '../../../models/appointment_response.dart';
@@ -11,6 +12,7 @@ class AppointmentController extends GetxController {
     // Simule des rendez-vous
     appointments.addAll([
       AppointmentRequest(
+        id:"1",
         userId: "1",
         vin: "ABC123",
         vehicleType: "Car",
@@ -19,6 +21,7 @@ class AppointmentController extends GetxController {
         location: "Columbus BMV",
       ),
       AppointmentRequest(
+        id:"2",
         userId: "2",
         vin: "DEF456",
         vehicleType: "Truck",
@@ -27,6 +30,7 @@ class AppointmentController extends GetxController {
         location: "Cleveland BMV",
       ),
       AppointmentRequest(
+        id:"3",
         userId: "3",
         vin: "GHI789",
         vehicleType: "Bike",
@@ -36,3 +40,4 @@ class AppointmentController extends GetxController {
     super.onInit();
   }
 }
+

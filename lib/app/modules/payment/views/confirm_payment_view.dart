@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:salvage_app/app/modules/payment/controllers/payment_controller.dart';
 import 'package:salvage_app/app/theme/app_theme.dart';
 import 'package:salvage_app/app/widgets/custom_button.dart';
+import '../../../models/payment_mode_response.dart';
 
 class ConfirmPaymentView extends StatelessWidget {
   const ConfirmPaymentView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final double total = Get.arguments ?? 0.0; // 👈 récupère le total
-
-    final TextEditingController cardNumberController = TextEditingController();
-    final TextEditingController expiryController = TextEditingController();
-    final TextEditingController cvvController = TextEditingController();
-    final TextEditingController nameController = TextEditingController();
-    final TextEditingController emailController = TextEditingController();
+    final PaymentController controller = Get.find();
 
     return Scaffold(
       appBar: AppBar(
@@ -30,76 +26,36 @@ class ConfirmPaymentView extends StatelessWidget {
           children: [
             Image.asset("assets/images/logo-payement.png", height: 100),
             const SizedBox(height: 16),
-            Text("Total: \$${total.toStringAsFixed(2)}", // 👈 affichage réel
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            Obx(() => Text(
+              "Total: \$${controller.totalAmount.value.toStringAsFixed(2)}",
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            )),
             const SizedBox(height: 8),
             const Text("Choose your preferred method", style: TextStyle(fontSize: 14)),
-
             const SizedBox(height: 24),
 
-            TextField(
-              controller: cardNumberController,
+            Obx(() => DropdownButtonFormField<PaymentMode>(
               decoration: const InputDecoration(
-                labelText: "Card Number",
+                labelText: "Payment Method",
                 border: OutlineInputBorder(),
               ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 12),
-
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: expiryController,
-                    decoration: const InputDecoration(
-                      labelText: "MM/YY",
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.datetime,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: cvvController,
-                    decoration: const InputDecoration(
-                      labelText: "CVV",
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    obscureText: true,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: "Cardholder Name",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            CustomButton(
-              text: "Pay with Stripe",
-              backgroundColor: Colors.red,
-              onTap: () {
-                Get.snackbar("Succès", "Paiement de \$${total.toStringAsFixed(2)} effectué !");
-                Get.back();
+              value: controller.selectedPaymentMode.value,
+              items: controller.paymentModes.map((mode) {
+                return DropdownMenuItem(
+                  value: mode,
+                  child: Text(mode.name),
+                );
+              }).toList(),
+              onChanged: (mode) {
+                controller.selectedPaymentMode.value = mode;
               },
+            )),
+
+            const SizedBox(height: 24),
+            CustomButton(
+              text: "Pay with ${controller.selectedPaymentMode.value?.name ?? '...'}",
+              backgroundColor: Colors.red,
+              onTap: () => controller.initiateStripePayment(),
               textColor: Colors.white,
             ),
           ],
