@@ -3,91 +3,113 @@ import 'package:flutter/material.dart';
 class CustomConfirmationModal extends StatelessWidget {
   final String title;
   final String description;
+  final String? imageAssetPath; // Pour l'icône de déconnexion
+  final String confirmText;
+  final String cancelText;
+  final VoidCallback onConfirm;
+  final VoidCallback onCancel;
   final List<String>? radioOptions;
   final String? selectedOption;
   final Function(String?)? onRadioChanged;
   final TextEditingController? inputController;
-  final VoidCallback onConfirm;
-  final VoidCallback onCancel;
 
   const CustomConfirmationModal({
     Key? key,
     required this.title,
     required this.description,
+    required this.onConfirm,
+    required this.onCancel,
+    this.imageAssetPath,
+    this.confirmText = 'Continue',
+    this.cancelText = 'Cancel',
     this.radioOptions,
     this.selectedOption,
     this.onRadioChanged,
     this.inputController,
-    required this.onConfirm,
-    required this.onCancel,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       insetPadding: const EdgeInsets.all(20),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              Text(description,
-                  style: const TextStyle(fontSize: 14, color: Colors.black54)),
-              const SizedBox(height: 16),
-
-              if (inputController != null) ...[
-                TextField(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (imageAssetPath != null) ...[
+              Image.asset(imageAssetPath!, height: 64),
+              const SizedBox(height: 20),
+            ],
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              description,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 14, color: Colors.black54),
+            ),
+            const SizedBox(height: 16),
+            if (inputController != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: TextField(
                   controller: inputController,
                   decoration: const InputDecoration(
-                    hintText: "Enter your input here",
+                    hintText: "Enter your input",
                     border: OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 16),
-              ],
-
-              if (radioOptions != null && onRadioChanged != null) ...[
-                Column(
-                  children: radioOptions!
-                      .map((option) => RadioListTile<String>(
-                    title: Text(option),
-                    value: option,
-                    groupValue: selectedOption,
-                    onChanged: onRadioChanged,
-                  ))
-                      .toList(),
-                ),
-              ],
-
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                    ),
+              ),
+            if (radioOptions != null && onRadioChanged != null)
+              Column(
+                children: radioOptions!
+                    .map((option) => RadioListTile<String>(
+                  title: Text(option),
+                  value: option,
+                  groupValue: selectedOption,
+                  onChanged: onRadioChanged,
+                ))
+                    .toList(),
+              ),
+            const SizedBox(height: 24),
+            Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
                     onPressed: onCancel,
-                    child: const Text("Cancel"),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: Text(cancelText),
                   ),
-                  ElevatedButton(
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: onConfirm,
+                    icon: const Icon(Icons.chat, size: 18),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    onPressed: onConfirm,
-                    child: const Text("Confirm"),
+                    label: Text(confirmText),
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

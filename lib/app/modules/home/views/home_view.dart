@@ -4,20 +4,38 @@ import 'package:salvage_app/app/routes/app_pages.dart';
 import 'package:salvage_app/app/modules/home/controllers/home_controller.dart';
 import 'package:salvage_app/app/widgets/custom_toast.dart';
 import 'package:salvage_app/app/widgets/custom_confirmation_modal.dart';
-import 'package:salvage_app/app/theme/app_theme.dart';
 import 'package:salvage_app/app/widgets/home_card.dart';
-
 import '../../../widgets/custom_bottom_nav_bar.dart';
 
 class HomeView extends StatelessWidget {
   HomeView({super.key});
   final controller = Get.put(HomeController());
-  String? selectedOption;
 
+  void _showWhatsAppConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => CustomConfirmationModal(
+        title: 'Continue to WhatsApp?',
+        description: 'You are about to leave the app to chat with our team on WhatsApp.\n\n'
+            'This channel is reserved for support regarding your documents or appointments.',
+        imageAssetPath: 'assets/images/whatsapp-icon.png',
+        confirmText: 'Continue',
+        cancelText: 'Cancel',
+        onConfirm: () {
+          Navigator.of(context).pop();
+          controller.contactOnWhatsApp();
+        },
+        onCancel: () {
+          Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     CustomToast.setContext(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -25,7 +43,7 @@ class HomeView extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.menu),
           onPressed: () {
-            // Handle drawer open if any
+            // Open drawer if needed
           },
         ),
         actions: [
@@ -74,7 +92,7 @@ class HomeView extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: controller.contactOnWhatsApp,
+        onPressed: () => _showWhatsAppConfirmation(context),
         backgroundColor: Colors.green,
         child: Image.asset(
           'assets/images/whatsapp-icon.png',
@@ -82,8 +100,7 @@ class HomeView extends StatelessWidget {
           width: 32,
         ),
       ),
-      bottomNavigationBar: const CustomBottomNavBar(activeIndex: 0), // ← Ajout ici
+      bottomNavigationBar: const CustomBottomNavBar(activeIndex: 0),
     );
   }
 }
-

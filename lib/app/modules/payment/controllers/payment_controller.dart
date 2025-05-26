@@ -9,8 +9,12 @@ import 'package:salvage_app/app/services/payment_service.dart';
 import 'package:salvage_app/app/services/secure_storage_service.dart';
 import 'package:salvage_app/app/widgets/custom_toast.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+
 
 import '../../../models/payment_response.dart';
+import '../../../routes/app_pages.dart';
+import '../../../widgets/payment_success_view.dart';
 
 class PaymentController extends GetxController {
   final AppointmentService _appointmentService = AppointmentService();
@@ -153,5 +157,75 @@ class PaymentController extends GetxController {
       }
     }
   }
+  Future<void> payWithStripeIntent() async {
+    final token = await SecureStorageService.readToken();
+    final userId = await SecureStorageService.readUserId();
+    final paymentMode = selectedPaymentMode.value;
+
+    if (token == null || userId == null || paymentMode == null) {
+      CustomToast.showError(Get.context!, "Paiement impossible, infos manquantes.");
+      return;
+    }
+
+    final request = PaymentRequestResponse(
+      userId: userId,
+      appointmentIds: appointments.map((e) => e.id).toList(),
+      paymentModeId: paymentMode.id,
+      amounts: appointments.map((e) => e.price ?? 0.0).toList(),
+      currency: 'usd',
+    );
+
+    // ✅ Affiche le loader pendant l’initiation
+    Get.dialog(
+      const Center(child: CircularProgressIndicator()),
+      barrierDismissible: false,
+    );
+
+    try {
+      // 1. Création du PaymentIntent côté backend
+      final response = await _paymentService.createPaymentIntent(
+        token: token,
+        request: request,
+      );
+      final clientSecret = response.clientSecret;
+
+      // 2. Initialisation de la feuille de paiement Stripe
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: clientSecret,
+          merchantDisplayName: 'Salvage App',
+          style: ThemeMode.light,
+          allowsDelayedPaymentMethods: false,
+        ),
+      );
+
+      // Ferme le loader avant d'afficher la feuille de paiement
+      Get.back();
+
+      // 3. Présentation de la feuille de paiement
+      await Stripe.instance.presentPaymentSheet();
+
+      // 4. Paiement réussi
+      CustomToast.showSuccess(Get.context!, "Paiement effectué avec succès.");
+
+      // Recharge des rendez-vous
+      await fetchAppointments();
+
+      // 5. Affiche le widget de confirmation
+      showDialog(
+        context: Get.context!,
+        barrierDismissible: false,
+        builder: (_) => const PaymentSuccessView (),
+      );
+
+    } on StripeException catch (_) {
+      Get.back(); // Ferme le loader si erreur Stripe
+      CustomToast.showError(Get.context!, "Paiement annulé ou refusé.");
+    } catch (e) {
+      Get.back(); // Ferme le loader si erreur
+      CustomToast.showError(Get.context!, "Erreur inattendue : $e");
+    }
+  }
+
 
 }

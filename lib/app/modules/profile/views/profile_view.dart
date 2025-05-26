@@ -54,7 +54,6 @@ class ProfilePage extends StatelessWidget {
             _buildMenuItem(Icons.history, 'About', onTap: () {
               Get.toNamed(Routes.ABOUT);
             }),
-
             _buildMenuItem(Icons.help_outline, 'Help', onTap: () {}),
             _buildMenuItem(Icons.info_outline, 'Log out', onTap: () {
               showDialog(
@@ -62,6 +61,7 @@ class ProfilePage extends StatelessWidget {
                 builder: (_) => CustomConfirmationModal(
                   title: "Log out?",
                   description: "You are about to log out of your account.\nDo you want to continue?",
+                  imageAssetPath: 'assets/images/logout-icon.png', // Ajout de l'icône
                   onCancel: () => Get.back(),
                   onConfirm: () async {
                     Get.back(); // Ferme le dialog

@@ -55,7 +55,7 @@ class ConfirmPaymentView extends StatelessWidget {
             CustomButton(
               text: "Pay with ${controller.selectedPaymentMode.value?.name ?? '...'}",
               backgroundColor: Colors.red,
-              onTap: () => controller.initiateStripePayment(),
+              onTap: () => controller.payWithStripeIntent(),
               textColor: Colors.white,
             ),
           ],

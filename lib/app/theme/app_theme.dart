@@ -10,8 +10,17 @@ class AppColors {
   static const Color inputHint = Color(0xFFB0B0B0);        // Hint grisé
   static const Color borderColor = Color(0xFF000000);      // Bordure noire
   static const Color text = Color(0xFF000000);
-  static const Color googleBorder = Color(0xFFDDDDDD);     // Bordure bouton Google
+  static const Color googleBorder = Color(0xFFDDDDDD);
+  static const Color chatBackground = Color(0xFF00A884);   // Teal background (adjusted to match screenshot)
+  static const Color userMessageBubble = Color(0xFF25D366); // WhatsApp green for user messages
+  static const Color otherMessageBubble = Color(0xFFFFFFFF); // White for other messages
+  static const Color timestampText = Color(0xFF666666);     // Gray for timestamps
+  static const Color inputBarBackground = Color(0xFFF0F0F0); // Light gray for inpu
 }
+
+
+
+  // Bordure bouton Google
 
 class AppTheme {
   static final lightTheme = ThemeData(
